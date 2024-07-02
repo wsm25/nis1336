@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include "storage.h"
+#include "consts.h"
 
 typedef uint64_t TaskId;
 typedef int TagId;
@@ -45,8 +46,8 @@ class Dates {
         // ...
     }raw;
 public:
-    /// returns whether given date is included
-    bool include(const Date&);
+    /// returns whether the date set contains given date
+    bool contains(const Date&);
 };
 
 struct Task{
@@ -62,22 +63,22 @@ struct Task{
         Abort,
     };
     // fields
-    TaskId id;
-    char name[256]; // as file name
+    char name[TASKNAME_SIZE]; // as file name
     Time begin, end;
-    TagId tag[16]; // last is -1
+    unsigned tagscount;
+    TagId tags[MAX_TAGS_PER_TASK];
     Dates dates;
     Priority priority;
     Status status;
-    char content[65536];
+    char content[TASKCONTENT_SIZE];
 };
 
 // TODO: supported filter
-struct Filter{};
+struct Filter {};
 
 // All tasks for specific user
-class Tasks{
-    UserSesson* sesson;
+class Tasks {
+    Storage* sesson;
 public:
     void insert(Task);
     std::vector<Task&> select(Filter);

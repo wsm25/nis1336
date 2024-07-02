@@ -2,12 +2,13 @@
 #ifndef SCHEDULE_STORAGE_H
 #define SCHEDULE_STORAGE_H
 
-class UserSesson;
-#include "task.h"
-#include "account.h"
 #include <stdio.h>
 
-class UserSesson{
+class Storage;
+#include "task.h"
+#include "user.h"
+
+class Storage {
     int fd;
     char* mapping;
     ssize_t used; // used size
@@ -17,14 +18,14 @@ public:
     bool valid(){return fd==-1;}
     /// Open a schedule with name `name`.
     /// If file does not exist, create a new one.
-    UserSesson(const char* name);
-    ~UserSesson();
-    /// Cancel the account. After executing, all handler
-    /// will immediately fail
+    Storage(const char* name);
+    ~Storage();
+    /// Cancel the account. 
+    /// After executing, all handler will immediately fail
     void cancel();
-    /// Return its User handler
+    /// Get User fields
     User& user();
-    /// Return its Task handler and write length into `len`
+    /// Get Task array and write length into `len`
     Task* tasks(int& len);
     /// Any task insertion MUST use insert_task method, to allocate
     /// new memory on file; otherwise SIGSEGV may be raised

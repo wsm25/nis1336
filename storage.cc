@@ -17,14 +17,14 @@
 #include <string>
 
 #include "storage.h"
-#include "account.h"
+#include "user.h"
 #include "task.h"
 
 struct Metadata{
     int used;
 };
 
-UserSesson::UserSesson(const char* name){
+Storage::Storage(const char* name){
     if(strlen(name)>=20) return; // invalid name length
     std::string path("data/");
     path+=name;
@@ -37,8 +37,7 @@ UserSesson::UserSesson(const char* name){
         if(fd==-1) goto error;
         // TODO: init password
         meta.used=sizeof(Metadata)+sizeof(User);
-        strcpy(user.name, name);
-        user.tagcount=0;
+        new(&user) User(name);
         write(fd, &meta, sizeof(Metadata));
         write(fd, &user, sizeof(User));
         ftruncate(fd, meta.used+2*sizeof(Task)); // reserve 2 task space
@@ -67,13 +66,13 @@ error:
     goto end;
 }
 
-UserSesson::~UserSesson(){
+Storage::~Storage(){
     munmap(mapping, mapsize);
     close(fd);
     fd=-1;
 }
 
-void UserSesson::cancel(){
+void Storage::cancel(){
     std::string path("db/");
     path+=user().name;
     munmap(mapping, mapsize);
@@ -82,18 +81,18 @@ void UserSesson::cancel(){
     remove(path.c_str());
 }
 
-User& UserSesson::user(){
+User& Storage::user(){
     return *(User*)(mapping+sizeof(Metadata));
 }
 
-Task* UserSesson::tasks(int& len){
+Task* Storage::tasks(int& len){
     len = (used-sizeof(Metadata)+sizeof(User))/sizeof(Task);
     return (Task*)(mapping+sizeof(Metadata)+sizeof(User));
 }
 
-void UserSesson::insert_task(const Task& task){
-    if(used+sizeof(Task)>mapsize){ // allocate new block
-        mapsize=mapsize*3/2;
+void Storage::insert_task(const Task& task){
+    if(used+(ssize_t)sizeof(Task)>mapsize){ // allocate new block
+        mapsize=mapsize*3/2; // soundness: mapsize>tasksize*2
         ftruncate(fd, mapsize);
     }
     memcpy(mapping+used, &task, sizeof(Task));
