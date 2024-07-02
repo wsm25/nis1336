@@ -2,6 +2,8 @@
 #define SCHEDULE_ACCOUNT_H
 #include <cstdint>
 
+#include "storage.h"
+
 struct Tag {
     int count; // reference of the tag
     char name[16];
@@ -10,9 +12,10 @@ struct Tag {
 class User {
     char name[20];
     char hashpwd[20]; // sha-1
-    unsigned tagcount, taskcount; // count of tags and tasks
+    unsigned tagcount; // count of tags
     // tags is bound to a user. Task should only record tag id(index).
     Tag tags[128];
+    friend class UserSesson;
 public:
     /// Add a tag. If tags exists, increase its count;
     /// if tag is too long, or tag array is full, return false.
