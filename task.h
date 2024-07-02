@@ -1,36 +1,88 @@
-struct Time{};
-typedef unsigned long Id;
+#ifndef SCHEDULE_TASK_H
+#define SCHEDULE_TASK_H
+#include <cstdint>
+#include <vector>
+#include "storage.h"
 
-enum Priority{
-    Default,
-    Low,
-    Mid,
-    High,
+typedef uint64_t TaskId;
+typedef int TagId;
+
+struct Time {
+    uint8_t hour, minute, second;
 };
 
-enum Status{
-    Unfinished,
-    Finished,
-    Abort,
+struct Date {
+    uint16_t year;
+    uint8_t month, day;
 };
 
+// TODO: Dates
+// Dates for a task, including
+// - one off
+// - once per day from .. to ..
+// - once per week from .. to .. on specific weekday
+// - list of days
+// - etc.
 
-
-struct Tag{char name[256];};
-struct Date{};
-class Dates{
+class Dates {
+    // Supposed implement: tagged union
+    enum DatesType {
+        ONEOFF,
+        // ...
+    };
+    struct OneOff {
+        Date date;
+    };
+    struct DateList {
+        int length;
+        Date date[8];
+    };
+    // ...
+    DatesType type;
+    union DatesRaw {
+        OneOff oneoff;
+        DateList datelist;
+        // ...
+    }raw;
 public:
-    bool is_today(const Date&);
+    /// returns whether given date is included
+    bool include(const Date&);
 };
 
 struct Task{
-    Id id;
+    enum Priority {
+        Default,
+        Low,
+        Mid,
+        High,
+    };
+    enum Status {
+        Unfinished,
+        Finished,
+        Abort,
+    };
+    // fields
+    TaskId id;
     char name[256]; // as file name
-    Time departure, arrival;
-    Priority priority;
-    Tag tag;
+    Time begin, end;
+    TagId tag[16]; // last is -1
     Dates dates;
+    Priority priority;
     Status status;
     char content[65536];
 };
 
+// TODO: supported filter
+struct Filter{};
+
+// All tasks for specific user
+class Tasks{
+    UserSesson* sesson;
+public:
+    void insert(Task);
+    std::vector<Task&> select(Filter);
+    void edit(TaskId, Task);
+};
+
+
+#endif // SCHEDULE_TASK_H
