@@ -11,8 +11,8 @@ class Storage;
 class Storage {
     int fd;
     char* mapping;
-    ssize_t used; // used size
-    ssize_t mapsize; // mapping size
+    unsigned* used; // used size
+    unsigned mapsize, original; // mapping size
 public:
     /// Check if the session is valid
     bool valid(){return fd==-1;}
