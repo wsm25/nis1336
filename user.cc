@@ -52,7 +52,7 @@ bool User :: verify_password(const char* password)
 {
     HashedPassword hashed_input_password;
     hashed_input_password.initialize(password);
-    if(hashed_input_password.hashedPassword == hashpwd.hashedPassword)
+    if(strcmp(hashed_input_password.hashedPassword,hashpwd.hashedPassword) == 0)
         return true;
     else return false;
 }

@@ -13,7 +13,7 @@
 
 typedef char Tag[TAGNAME_SIZE];
 struct HashedPassword {
-    std::string hashedPassword;
+    char hashedPassword[HASHEDPASSED_SIZE];
     void initialize(const char* password)
     {
         // Get an instance
@@ -26,7 +26,15 @@ struct HashedPassword {
         sha1.finalize();
 
         // Profit! oops, not really...
-        std::string hashedPassword = sha1.toString();
+        std::string str_hashedPassword = sha1.toString();
+        
+        //turn string to char
+        int i = 0;
+        for(;str_hashedPassword[i] != '\0';++i)
+            {
+                hashedPassword[i] = str_hashedPassword[i];
+            } 
+        hashedPassword[i] = '\0';
     }
 }; // sha_512
 

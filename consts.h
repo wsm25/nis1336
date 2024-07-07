@@ -9,4 +9,6 @@
 #define MAX_TAGS_PER_TASK 16
 #define MAX_TAGS_PER_USER 128
 
+#define HASHEDPASSED_SIZE 45
+
 #endif // SCHEDULE_CONSTS_H
