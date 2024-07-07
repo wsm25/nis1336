@@ -14,8 +14,7 @@ class Storage {
     unsigned* used; // used size
     unsigned mapsize, original; // mapping size
 public:
-    /// Check if the session is valid
-    bool valid(){return fd==-1;}
+    bool fail(){return fd==-1;}
     /// Open a schedule with name `name`.
     /// If file does not exist, create a new one.
     Storage(const char* name);

@@ -6,15 +6,15 @@
 #include "consts.h"
 // include the header "pathToLib/sha1.h" to use sha_512
 // If you are using C++14 or C++17, don't forget the "gsl" folder!
-#include "C:\Users\Lipeiying\Desktop\Hash-master\Hash-master\src/sha1.h"
+#include "sha1.h"
 #include <iostream>
 #include<cstring>
 #include<string>
 
 typedef char Tag[TAGNAME_SIZE];
-typedef struct {
-    string hashedPassword;
-    bool initialize(const char* password)
+struct HashedPassword {
+    std::string hashedPassword;
+    void initialize(const char* password)
     {
         // Get an instance
         Chocobo1::SHA1 sha1;
@@ -28,7 +28,7 @@ typedef struct {
         // Profit! oops, not really...
         std::string hashedPassword = sha1.toString();
     }
-} HashedPassword; // sha_512
+}; // sha_512
 
 
 class User {

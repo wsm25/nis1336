@@ -24,3 +24,5 @@
  * 
  * - deltask [name]                          delete task with given name
  */
+
+int main(int argc, char* argv[]){}
