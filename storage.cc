@@ -45,7 +45,6 @@ Storage::Storage(const char* name){
         if(read(fd, &meta, sizeof(Metadata))==-1) goto error;
         if(read(fd, &user, sizeof(User))==-1) goto error;
     }
-    printf("used: %d\n", meta.used);
     // file status
     struct stat sb;
     if(fstat(fd, &sb)!=0) goto error;
@@ -96,6 +95,11 @@ void Storage::insert_task(const Task& task){
         mapsize=mapsize*3/2; // soundness: mapsize>tasksize*2
         printf("new block: %d\n", mapsize);
         ftruncate(fd, mapsize);
+        mapping = (char*)mmap(
+            0, mapsize, 
+            PROT_WRITE|PROT_READ,
+            MAP_SHARED,
+            fd, 0);
     }
     printf("insert at %d\n", *used);
     memcpy(mapping+*used, &task, sizeof(Task));
