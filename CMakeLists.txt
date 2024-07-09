@@ -6,7 +6,7 @@ project(schedule
     HOMEPAGE_URL "https://github.com/wsm25/nis1336")
 
 # dep: hash
-include_directories(Hash/src)
+include_directories(${CMAKE_SOURCE_DIR}/Hash/src)
 add_executable(${PROJECT_NAME} 
     cli.cc storage.cc user.cc task.cc)
 
