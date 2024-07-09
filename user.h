@@ -1,12 +1,14 @@
+class user;
+
 #ifndef SCHEDULE_USER_H
 #define SCHEDULE_USER_H
 #include <cstdint>
 
-#include "storage.h"
+//#include "storage.h"
 #include "consts.h"
 // include the header "pathToLib/sha1.h" to use sha_512
 // If you are using C++14 or C++17, don't forget the "gsl" folder!
-#include "sha1.h"
+#include "/home/code/Lipeiying/nis1336/nis1336/Hash-master/src/sha1.h"
 #include <iostream>
 #include<cstring>
 #include<string>
@@ -63,6 +65,19 @@ public:
     bool password_unset(){return pwdunset;}
     /// Return tag name of tag with given id
     const char* tag(int id){return tags[id];}
+
+    ///To test and debug
+    void get_inform()
+    {
+        std::cout << name << std::endl;
+        std::cout << "tagcount = " << tagcount << std::endl;
+        std::cout << "tags: ";
+        for(int i = 0; i < tagcount; ++i)
+            std::cout << tags[i] << ' ';
+        std::cout << std::endl;
+        std::cout << hashpwd.hashedPassword << std::endl;
+        return; 
+    }
 };
 
 #endif // SCHEDULE_USER_H

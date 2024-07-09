@@ -25,7 +25,7 @@ User :: User(const char* username)
 
 /// Add a tag. If tags exists, increase its count;
 /// if tag is too long, or tag array is full, return false.
-///tagcount is 0-based
+///tags[] is 0-based
 bool User :: add_tag(const char* tag)
 {
     int taglen = strlen(tag);

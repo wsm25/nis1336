@@ -1,3 +1,4 @@
+class task;
 #ifndef SCHEDULE_TASK_H
 #define SCHEDULE_TASK_H
 #include <cstdint>
