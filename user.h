@@ -8,7 +8,7 @@ class user;
 #include "consts.h"
 // include the header "pathToLib/sha1.h" to use sha_512
 // If you are using C++14 or C++17, don't forget the "gsl" folder!
-#include "/home/code/Lipeiying/nis1336/nis1336/Hash-master/src/sha1.h"
+#include "Hash/src/sha1.h"
 #include <iostream>
 #include<cstring>
 #include<string>
