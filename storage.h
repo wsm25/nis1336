@@ -1,10 +1,9 @@
-
+class Storage;
 #ifndef SCHEDULE_STORAGE_H
 #define SCHEDULE_STORAGE_H
 
 #include <stdio.h>
 
-class Storage;
 #include "task.h"
 #include "user.h"
 
