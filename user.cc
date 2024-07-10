@@ -13,6 +13,12 @@ using namespace std;
 /// Initialize all fields
 User :: User(const char* username)
 {
+    // invalid name length
+    if(strlen(username)>=20)
+    {
+        cout << "Your name is too long" << endl;
+        return; 
+    }
     int i = 0;
     for (;username[i] != '\0' ;++i)
         name[i] = username[i];
@@ -41,10 +47,17 @@ bool User :: add_tag(const char* tag)
 }
 
 /// Set password 
-void User :: set_password(const char* password)
+bool User :: set_password(const char* password)
 {
+    //invalid password length
+    if(strlen(password)>=20)
+    {
+        cout << "Your password is too long" << endl;
+        return false; 
+    }
     hashpwd.initialize(password);
     pwdunset = false;
+    return true;
 }
 
 /// Verify password 

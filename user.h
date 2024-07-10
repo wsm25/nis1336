@@ -58,7 +58,7 @@ public:
     /// if tag is too long, or tag array is full, return false.
     bool add_tag(const char* tag);
     /// Set password
-    void set_password(const char* password);
+    bool set_password(const char* password);
     /// Verify password
     bool verify_password(const char* password);
     /// Whether password is unset
