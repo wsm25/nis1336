@@ -18,10 +18,12 @@ int main()
     T.insert(t1);
     cout << T.insert(t1) << endl;
     T.insert(t2);
-    for(auto x : v)
+    auto v1 = T.select(&Task::name, (decltype(Task::name))"task1");
+    auto v2 = T.sort<decltype(Task::name)>(&Task::name, std::greater<decltype(Task::name)>());
+    for(auto x : v1)
         cout << x << " ";
     cout << endl;
-    for(auto x : v)
+    for(auto x : v1)
         cout << T[x].name << " ";
     cout << endl;
     s.cancel();
