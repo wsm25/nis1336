@@ -85,7 +85,7 @@ User& Storage::user(){
     return *(User*)(mapping+sizeof(Metadata));
 }
 
-Task* Storage::tasks(int& len){
+Task* Storage::tasks(uint64_t& len){
     len = (*used-sizeof(Metadata)-sizeof(User))/sizeof(Task);
     return (Task*)(mapping+sizeof(Metadata)+sizeof(User));
 }
