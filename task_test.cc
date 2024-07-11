@@ -18,7 +18,6 @@ int main()
     T.insert(t1);
     cout << T.insert(t1) << endl;
     T.insert(t2);
-    auto v = T.sort(&Task::name);
     for(auto x : v)
         cout << x << " ";
     cout << endl;

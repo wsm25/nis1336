@@ -5,9 +5,9 @@
 #include <initializer_list>
 #include <stdexcept> //std::out_of_range,std::range_error
 
-///array: a class acted like std::vector but with fixed capacity.
+///Array: a class acted like std::vector but with fixed capacity.
 template <class T, size_t N>
-class array
+class Array
 {
 public:
     //member type
@@ -27,48 +27,48 @@ private:
 
 public:
     ///construct/destruct
-    array() : a(), n(0) {}
-    array(size_type size) : array()
+    Array() : a(), n(0) {}
+    Array(size_type size) : Array()
     {
-        if(size > N) throw std::out_of_range("array(size_type)");
+        if(size > N) throw std::out_of_range("Array(size_type)");
         else n = size;
     }
-    array(size_type size, const value_type &value) : array(size)
+    Array(size_type size, const value_type &value) : Array(size)
     {
         for(size_type i = 0; i < n; ++i)
             a[i] = value;
     }
-    array(const array &A) : array()
+    Array(const Array &A) : Array()
     {
         for(; n < A.n; ++n)
             a[n] = A.a[n];
     }
     template<typename InputIterator, typename = std::_RequireInputIter<InputIterator>>
-    array(InputIterator first, InputIterator last) : array()
+    Array(InputIterator first, InputIterator last) : Array()
     {
         for(; first < last && n < N; ++first, ++n)
             a[n] = *first;
     }
-    array(std::initializer_list<value_type> l): array()
+    Array(std::initializer_list<value_type> l): Array()
     {
         for(auto it = l.begin(); it < l.end() && n < N; ++it, ++n)
             a[n] = *it;
     }
-    array &operator=(const array &A)
+    Array &operator=(const Array &A)
     {
         if(&A == this) return *this;
         for(n = 0; n < A.n; ++n)
             a[n] = A.a[n];
         return *this;
     }
-    array &operator=(std::initializer_list<value_type> l)
+    Array &operator=(std::initializer_list<value_type> l)
     {
         n = 0;
         for(auto it = l.begin(); it < l.end() && n < N; ++it, ++n)
             a[n] = *it;
         return *this;
     }
-    ~array() { n = 0; }
+    ~Array() { n = 0; }
 
     ///iterator
     iterator begin() { return a; }
@@ -86,12 +86,12 @@ public:
     bool full() const { return n == N; }
     void resize(size_type size)
     {
-        if(size > N) throw std::out_of_range("array::resize(size_type)");
+        if(size > N) throw std::out_of_range("Array::resize(size_type)");
         if(size > n) n = size;
     }
     void resize(size_type size, const value_type &value)
     {
-        if(size > N) throw std::out_of_range("void array::resize(size_type, const value_type &)");
+        if(size > N) throw std::out_of_range("void Array::resize(size_type, const value_type &)");
         for(; n < size; ++n)
             a[n] = value;
     }
@@ -101,12 +101,12 @@ public:
     const_reference operator[](size_type index) const { return a[index]; }
     reference at(size_type index)
     {
-        if(index >= n) throw std::out_of_range("reference array::at(size_type)");
+        if(index >= n) throw std::out_of_range("reference Array::at(size_type)");
         return a[index];
     }
     const_reference at(size_type index) const
     {
-        if(index >= n) throw std::out_of_range("const_reference array::at(size_type) const");
+        if(index >= n) throw std::out_of_range("const_reference Array::at(size_type) const");
         return a[index];
     }
     reference front() { return a[0]; }
@@ -119,7 +119,7 @@ public:
     ///modifier
     void assign(size_type size, const value_type &value)
     {
-        if(size > N) throw std::out_of_range("void array::assign(size_type, const value_type &)");
+        if(size > N) throw std::out_of_range("void Array::assign(size_type, const value_type &)");
         for(n = 0; n < size; ++n)
             a[n] = value;
     }
@@ -127,14 +127,14 @@ public:
     void assign(InputIterator first, InputIterator last)
     {
         for(n = 0; first < last && n < N; ++first, ++n)
-            if(n >= N) throw std::out_of_range("void array::assign(InputIterator, InputIterator)");
+            if(n >= N) throw std::out_of_range("void Array::assign(InputIterator, InputIterator)");
             else a[n] = *first;
     }
     void assign(std::initializer_list<value_type> l)
     {
         n = 0;
         for(auto it = l.begin(); it < l.end(); ++it, ++n)
-            if(n >= N) throw std::out_of_range("void array::assign(initializer_list)");
+            if(n >= N) throw std::out_of_range("void Array::assign(initializer_list)");
             else a[n] = *it;
     }
     void push_back(const value_type &value)
@@ -184,21 +184,21 @@ public:
 
     ///compare
     template <class _T, size_t _N>
-    friend bool operator!=(const array<_T, _N> &a1, const array<_T, _N> &a2);
+    friend bool operator!=(const Array<_T, _N> &a1, const Array<_T, _N> &a2);
     template <class _T, size_t _N>
-    friend bool operator==(const array<_T, _N> &a1, const array<_T, _N> &a2);
+    friend bool operator==(const Array<_T, _N> &a1, const Array<_T, _N> &a2);
     template <class _T, size_t _N>
-    friend bool operator<(const array<_T, _N> &a1, const array<_T, _N> &a2);
+    friend bool operator<(const Array<_T, _N> &a1, const Array<_T, _N> &a2);
     template <class _T, size_t _N>
-    friend bool operator>(const array<_T, _N> &a1, const array<_T, _N> &a2);
+    friend bool operator>(const Array<_T, _N> &a1, const Array<_T, _N> &a2);
     template <class _T, size_t _N>
-    friend bool operator<=(const array<_T, _N> &a1, const array<_T, _N> &a2);
+    friend bool operator<=(const Array<_T, _N> &a1, const Array<_T, _N> &a2);
     template <class _T, size_t _N>
-    friend bool operator>=(const array<_T, _N> &a1, const array<_T, _N> &a2);
+    friend bool operator>=(const Array<_T, _N> &a1, const Array<_T, _N> &a2);
 };
 ///to avoid redefinition, I have to define the friend outside the class
 template <class _T, size_t _N>
-bool operator!=(const array<_T, _N> &a1, const array<_T, _N> &a2)
+bool operator!=(const Array<_T, _N> &a1, const Array<_T, _N> &a2)
 {
     if(a1.n != a2.n) return true;
     for(size_t i = 0; i < a1.n; ++i)
@@ -206,12 +206,12 @@ bool operator!=(const array<_T, _N> &a1, const array<_T, _N> &a2)
     return false;
 }
 template <class _T, size_t _N>
-bool operator==(const array<_T, _N> &a1, const array<_T, _N> &a2)
+bool operator==(const Array<_T, _N> &a1, const Array<_T, _N> &a2)
 {
     return !(a1 != a2);
 }
 template <class _T, size_t _N>
-bool operator<(const array<_T, _N> &a1, const array<_T, _N> &a2)
+bool operator<(const Array<_T, _N> &a1, const Array<_T, _N> &a2)
 {
     for(size_t i = 0; i < a1.n && i < a2.n; ++i)
     {
@@ -221,24 +221,24 @@ bool operator<(const array<_T, _N> &a1, const array<_T, _N> &a2)
     return a1.n < a2.n;
 }
 template <class _T, size_t _N>
-bool operator>(const array<_T, _N> &a1, const array<_T, _N> &a2)
+bool operator>(const Array<_T, _N> &a1, const Array<_T, _N> &a2)
 {
     return a2 < a1;
 }
 template <class _T, size_t _N>
-bool operator<=(const array<_T, _N> &a1, const array<_T, _N> &a2)
+bool operator<=(const Array<_T, _N> &a1, const Array<_T, _N> &a2)
 {
     return !(a2 < a1);
 }
 template <class _T, size_t _N>
-bool operator>=(const array<_T, _N> &a1, const array<_T, _N> &a2)
+bool operator>=(const Array<_T, _N> &a1, const Array<_T, _N> &a2)
 {
     return !(a1 < a2);
 }
 
-//the only difference is that class array<char, N> can be constructed by and converted into const char*
+//the only difference is that class Array<char, N> can be constructed by and converted into const char*
 template <size_t N>
-class array<char, N>
+class Array<char, N>
 {
 public:
     //member type
@@ -258,63 +258,63 @@ private:
 
 public:
     ///construct/destruct
-    array() : a(), n(0) {}
-    array(size_type size) : array()
+    Array() : a(), n(0) {}
+    Array(size_type size) : Array()
     {
-        if(size > N) throw std::out_of_range("array(size_type)");
+        if(size > N) throw std::out_of_range("Array(size_type)");
         else n = size;
     }
-    array(size_type size, const value_type &value) : array(size)
+    Array(size_type size, const value_type &value) : Array(size)
     {
         for(size_type i = 0; i < n; ++i)
             a[i] = value;
     }
-    array(const array &A) : array()
+    Array(const Array &A) : Array()
     {
         for(; n < A.n; ++n)
             a[n] = A.a[n];
     }
     template<typename InputIterator, typename = std::_RequireInputIter<InputIterator>>
-    array(InputIterator first, InputIterator last) : array()
+    Array(InputIterator first, InputIterator last) : Array()
     {
         for(; first < last && n < N; ++first, ++n)
             a[n] = *first;
     }
-    array(std::initializer_list<value_type> l): array()
+    Array(std::initializer_list<value_type> l): Array()
     {
         for(auto it = l.begin(); it < l.end() && n < N; ++it, ++n)
             a[n] = *it;
     }
-    array(const char *A): array()
+    Array(const char *A): Array()
     {
         for(; n < N && A[n]; ++n)
             a[n] = A[n];
         if(n < N) a[n++] = 0;
-        else throw std::out_of_range("array(const char *)");
+        else throw std::out_of_range("Array(const char *)");
     }
-    array &operator=(const char *A)
+    Array &operator=(const char *A)
     {
         for(n = 0; n < N && A[n]; ++n)
             a[n] = A[n];
         if(n < N) a[n++] = 0;
-        else throw std::out_of_range("array &operator=(const char *)");
+        else throw std::out_of_range("Array &operator=(const char *)");
         return *this;
     }
-    array &operator=(const array &A)
+    Array &operator=(const Array &A)
     {
         if(&A == this) return *this;
         for(n = 0; n < A.n; ++n)
             a[n] = A.a[n];
         return *this;
     }
-    array &operator=(std::initializer_list<value_type> l)
+    Array &operator=(std::initializer_list<value_type> l)
     {
         n = 0;
         for(auto it = l.begin(); it < l.end() && n < N; ++it, ++n)
             a[n] = *it;
         return *this;
     }
-    ~array() { n = 0; }
+    ~Array() { n = 0; }
 
     ///iterator
     iterator begin() { return a; }
@@ -332,12 +332,12 @@ public:
     bool full() const { return n == N; }
     void resize(size_type size)
     {
-        if(size > N) throw std::out_of_range("array::resize(size_type)");
+        if(size > N) throw std::out_of_range("Array::resize(size_type)");
         if(size > n) n = size;
     }
     void resize(size_type size, const value_type &value)
     {
-        if(size > N) throw std::out_of_range("void array::resize(size_type, const value_type &)");
+        if(size > N) throw std::out_of_range("void Array::resize(size_type, const value_type &)");
         for(; n < size; ++n)
             a[n] = value;
     }
@@ -347,12 +347,12 @@ public:
     const_reference operator[](size_type index) const { return a[index]; }
     reference at(size_type index)
     {
-        if(index >= n) throw std::out_of_range("reference array::at(size_type)");
+        if(index >= n) throw std::out_of_range("reference Array::at(size_type)");
         return a[index];
     }
     const_reference at(size_type index) const
     {
-        if(index >= n) throw std::out_of_range("const_reference array::at(size_type) const");
+        if(index >= n) throw std::out_of_range("const_reference Array::at(size_type) const");
         return a[index];
     }
     reference front() { return a[0]; }
@@ -366,7 +366,7 @@ public:
     ///modifier
     void assign(size_type size, const value_type &value)
     {
-        if(size > N) throw std::out_of_range("void array::assign(size_type, const value_type &)");
+        if(size > N) throw std::out_of_range("void Array::assign(size_type, const value_type &)");
         for(n = 0; n < size; ++n)
             a[n] = value;
     }
@@ -374,14 +374,14 @@ public:
     void assign(InputIterator first, InputIterator last)
     {
         for(n = 0; first < last && n < N; ++first, ++n)
-            if(n >= N) throw std::out_of_range("void array::assign(InputIterator, InputIterator)");
+            if(n >= N) throw std::out_of_range("void Array::assign(InputIterator, InputIterator)");
             else a[n] = *first;
     }
     void assign(std::initializer_list<value_type> l)
     {
         n = 0;
         for(auto it = l.begin(); it < l.end(); ++it, ++n)
-            if(n >= N) throw std::out_of_range("void array::assign(initializer_list)");
+            if(n >= N) throw std::out_of_range("void Array::assign(initializer_list)");
             else a[n] = *it;
     }
     void push_back(const value_type &value)
@@ -431,21 +431,21 @@ public:
 
     ///compare
     template <size_t _N>
-    friend bool operator!=(const array<char, _N> &a1, const array<char, _N> &a2);
+    friend bool operator!=(const Array<char, _N> &a1, const Array<char, _N> &a2);
     template <size_t _N>
-    friend bool operator==(const array<char, _N> &a1, const array<char, _N> &a2);
+    friend bool operator==(const Array<char, _N> &a1, const Array<char, _N> &a2);
     template <size_t _N>
-    friend bool operator<(const array<char, _N> &a1, const array<char, _N> &a2);
+    friend bool operator<(const Array<char, _N> &a1, const Array<char, _N> &a2);
     template <size_t _N>
-    friend bool operator>(const array<char, _N> &a1, const array<char, _N> &a2);
+    friend bool operator>(const Array<char, _N> &a1, const Array<char, _N> &a2);
     template <size_t _N>
-    friend bool operator<=(const array<char, _N> &a1, const array<char, _N> &a2);
+    friend bool operator<=(const Array<char, _N> &a1, const Array<char, _N> &a2);
     template <size_t _N>
-    friend bool operator>=(const array<char, _N> &a1, const array<char, _N> &a2);
+    friend bool operator>=(const Array<char, _N> &a1, const Array<char, _N> &a2);
 };
 
 template <size_t _N>
-bool operator!=(const array<char, _N> &a1, const array<char, _N> &a2)
+bool operator!=(const Array<char, _N> &a1, const Array<char, _N> &a2)
 {
     if(a1.n != a2.n) return true;
     for(size_t i = 0; i < a1.n; ++i)
@@ -453,12 +453,12 @@ bool operator!=(const array<char, _N> &a1, const array<char, _N> &a2)
     return false;
 }
 template <size_t _N>
-bool operator==(const array<char, _N> &a1, const array<char, _N> &a2)
+bool operator==(const Array<char, _N> &a1, const Array<char, _N> &a2)
 {
     return !(a1 != a2);
 }
 template <size_t _N>
-bool operator<(const array<char, _N> &a1, const array<char, _N> &a2)
+bool operator<(const Array<char, _N> &a1, const Array<char, _N> &a2)
 {
     for(size_t i = 0; i < a1.n && i < a2.n; ++i)
     {
@@ -468,17 +468,17 @@ bool operator<(const array<char, _N> &a1, const array<char, _N> &a2)
     return a1.n < a2.n;
 }
 template <size_t _N>
-bool operator>(const array<char, _N> &a1, const array<char, _N> &a2)
+bool operator>(const Array<char, _N> &a1, const Array<char, _N> &a2)
 {
     return a2 < a1;
 }
 template <size_t _N>
-bool operator<=(const array<char, _N> &a1, const array<char, _N> &a2)
+bool operator<=(const Array<char, _N> &a1, const Array<char, _N> &a2)
 {
     return !(a2 < a1);
 }
 template <size_t _N>
-bool operator>=(const array<char, _N> &a1, const array<char, _N> &a2)
+bool operator>=(const Array<char, _N> &a1, const Array<char, _N> &a2)
 {
     return !(a1 < a2);
 }
