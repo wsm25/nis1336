@@ -23,7 +23,7 @@ int main()
         cout << x << " ";
     cout << endl;
     for(auto x : v)
-        cout << T[x].name.data() << " ";
+        cout << T[x].name << " ";
     cout << endl;
     s.cancel();
     return 0;
