@@ -1,17 +1,10 @@
-class task;
 #ifndef SCHEDULE_TASK_H
 #define SCHEDULE_TASK_H
-#include <cstdint>
-#include <vector>
-#include "storage.h"
+
+#include <stdint.h>
+#include <time.h>
+#include "array.h"
 #include "consts.h"
-
-typedef uint64_t TaskId;
-typedef int TagId;
-
-struct Time {
-    uint8_t hour, minute, second;
-};
 
 struct Date {
     uint16_t year;
@@ -49,42 +42,28 @@ class Dates {
 public:
     /// returns whether the date set contains given date
     bool contains(const Date&);
+    friend bool operator==(const Dates &d1, const Dates &d2);
+    friend bool operator!=(const Dates &d1, const Dates &d2);
+    friend bool operator<(const Dates &d1, const Dates &d2);
+    friend bool operator>(const Dates &d1, const Dates &d2);
+    friend bool operator<=(const Dates &d1, const Dates &d2);
+    friend bool operator>=(const Dates &d1, const Dates &d2);
 };
 
-struct Task{
-    enum Priority {
-        Default,
-        Low,
-        Mid,
-        High,
-    };
-    enum Status {
-        Unfinished,
-        Finished,
-        Abort,
-    };
-    // fields
-    char name[TASKNAME_SIZE]; // as file name
-    Time begin, end;
-    unsigned tagscount;
-    TagId tags[MAX_TAGS_PER_TASK];
-    Dates dates;
+struct Task
+{
+    ///member type
+    enum Priority { None, Low, Mid, High, };
+    enum Status { Unfinished, Finished, Abort,};
+
+    ///fields
+    array<char, TASKNAME_SIZE> name;
+    time_t begin, end;
+    array<uint8_t, MAX_TAGS_PER_TASK> tags;
+    //Dates dates;
     Priority priority;
     Status status;
     char content[TASKCONTENT_SIZE];
 };
-
-// TODO: supported filter
-struct Filter {};
-
-// All tasks for specific user
-class Tasks {
-    Storage* sesson;
-public:
-    void insert(Task);
-    std::vector<Task&> select(Filter);
-    void edit(TaskId, Task);
-};
-
 
 #endif // SCHEDULE_TASK_H
