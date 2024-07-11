@@ -57,9 +57,9 @@ struct Task
     enum Status { Unfinished, Finished, Abort,};
 
     ///fields
-    array<char, TASKNAME_SIZE> name;
+    Array<char, TASKNAME_SIZE> name;
     time_t begin, end;
-    array<uint8_t, MAX_TAGS_PER_TASK> tags;
+    Array<uint8_t, MAX_TAGS_PER_TASK> tags;
     //Dates dates;
     Priority priority;
     Status status;
