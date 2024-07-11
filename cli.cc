@@ -25,4 +25,75 @@
  * - deltask [name]                          delete task with given name
  */
 
-int main(int argc, char* argv[]){}
+
+#include<iostream>
+#include<cstdlib>
+#include<cstdio>
+#include<cmath>
+#include<pthread.h>
+#include <unistd.h>
+#include<string>
+#include<cstring>
+#include"storage.h"
+#include"tasks.h"
+#include"Command.h"
+
+
+
+///线程函数
+void* Input(void*arg)
+{
+    std::string command;
+
+    while (true)
+    {
+        std::cin >> command;
+        
+        if(strcasecmp(command.c_str(),"addtask"))
+        {
+            addtask();
+        }
+    }
+    
+
+    return (void*)0;
+}
+
+void* Warning(void*arg)
+{
+    // for(int i = -10; i < 0; ++i)
+    // {
+    //     printf("%lx WARING_running %d\n",pthread_self(),i);
+    //     int time = (int)(drand48() * 100000);
+    //     usleep(time);
+    // }
+
+    // return (void*)0;
+}
+
+int main(int argc, char* argv[])
+{
+    ///
+
+    ///创建输入线程&&定时提示线程
+    pthread_t add_task_thread,warning_thread;
+
+    if(pthread_create(&add_task_thread,NULL,Input,NULL)) { 
+        std::cerr << "Fail to creat INPUT_THREAD" << std::endl; 
+        return -1; 
+    } 
+    
+    if(pthread_create(&warning_thread,NULL,Warning,NULL)) { 
+        std::cerr << "Fail to creat WARNING_THREAD" << std::endl; 
+        return -1; 
+    } 
+
+    ///等待线程结束,释放线程的资源 
+    pthread_join(add_task_thread,NULL); 
+    pthread_join(warning_thread,NULL); 
+
+    printf("Control thread id: %lx\n",pthread_self());
+    printf("finished!\n");
+
+    return 0;
+}

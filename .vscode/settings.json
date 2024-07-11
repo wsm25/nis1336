@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "vector": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iostream": "cpp"
     },
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/Hash/src"
