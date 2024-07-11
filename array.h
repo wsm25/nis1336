@@ -236,7 +236,7 @@ bool operator>=(const array<_T, _N> &a1, const array<_T, _N> &a2)
     return !(a1 < a2);
 }
 
-//the only difference is that class array<char, N> can also be constructed by const char*.
+//the only difference is that class array<char, N> can be constructed by and converted into const char*
 template <size_t N>
 class array<char, N>
 {
@@ -361,6 +361,7 @@ public:
     const_reference back() const { return a[n - 1]; }
     pointer data() { return a; }
     const_pointer data() const { return a; }
+    operator const char *() const { return a; }
 
     ///modifier
     void assign(size_type size, const value_type &value)

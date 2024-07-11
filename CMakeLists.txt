@@ -15,3 +15,5 @@ enable_testing()
 
 add_executable(storage_test storage_test.cc storage.cc user.cc)
 add_test(NAME storage_test COMMAND $<TARGET_FILE:storage_test>)
+
+add_executable(task_test task_test.cc tasks.cc storage.cc user.cc)
