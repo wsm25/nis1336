@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include<string>
 #include<cstring>
+#include <ctime>
 #include"storage.h"
 #include"tasks.h"
 #include"Command.h"
@@ -59,38 +60,94 @@ void* Input(void*arg)
     return (void*)0;
 }
 
-void* Warning(void*arg)
+void* Remind(void*arg)
 {
-    // for(int i = -10; i < 0; ++i)
-    // {
-    //     printf("%lx WARING_running %d\n",pthread_self(),i);
-    //     int time = (int)(drand48() * 100000);
-    //     usleep(time);
-    // }
+    while(true)
+    {
+        // 获取当前时间
+        time_t now;
+        time(&now);
 
-    // return (void*)0;
+        //参数强转成Tasks类
+        Tasks *using_tasks = (Tasks*)arg;
+        auto v = using_tasks->select(
+            [&](const Task &task) -> bool{
+                return task.remind == now;
+            }
+        );
+
+        //输出任务提醒
+        Task remind_task;
+        int v_size =v.size();
+        for(int i = 0; i < v_size; ++i)
+        {
+            remind_task = (*using_tasks)[v[i]];
+            std::cout << "Time for: " <<remind_task.name << std::endl;
+        }
+        sleep(5);
+    }
+
+    return (void*) 0;
 }
 
 int main(int argc, char* argv[])
 {
-    ///
+    if (argc < 2 || (argc > 2 && argc <= 4) ||(argc == 2 && strcmp(argv[1],"run") != 0))
+    {
+        std::cerr << "Invalid Input" << std::endl;
+        return 1;
+    }
+
+    //case：schedule-cli [username] [password] [command]    run one command with given user
+    if(argc > 4)
+    {
+        char* using_user = argv[1];
+        char* input_password = argv[2];
+        Storage opening_file(using_user);
+        if(!Open_By_Username(using_user,input_password,opening_file))
+        {
+            delete[]using_user;
+            delete[]input_password;
+            return 0;
+        } 
+        char* command = argv[3];
+        ///TODO：command we want
+
+
+        return 0;
+    }
+
+
+    //case: schedule-cli run--run shell with schedule reminder
+    ///输入用户名
+    std::cout << "Please enter your username: " << std::endl;
+    std::string user_name,your_password;
+    std::cin >> user_name;
+    std::cout << "Enter your password: " << std::endl;
+    std::cin >> your_password;
+    Storage using_file(user_name.c_str());
+    if(!Open_By_Username(user_name.c_str(),your_password.c_str(),using_file))
+        return 0;
+
+    Tasks tasks(using_file);
+
 
     ///创建输入线程&&定时提示线程
-    pthread_t add_task_thread,warning_thread;
+    pthread_t command_thread,remind_thread;
 
-    if(pthread_create(&add_task_thread,NULL,Input,NULL)) { 
-        std::cerr << "Fail to creat INPUT_THREAD" << std::endl; 
+    if(pthread_create(&command_thread,NULL,Input,NULL)) { 
+        std::cerr << "Fail to creat COMMAND_THREAD" << std::endl; 
         return -1; 
     } 
     
-    if(pthread_create(&warning_thread,NULL,Warning,NULL)) { 
+    if(pthread_create(&remind_thread,NULL,Remind,(void*)&tasks)) { 
         std::cerr << "Fail to creat WARNING_THREAD" << std::endl; 
         return -1; 
     } 
 
     ///等待线程结束,释放线程的资源 
-    pthread_join(add_task_thread,NULL); 
-    pthread_join(warning_thread,NULL); 
+    pthread_join(command_thread,NULL); 
+    pthread_join(remind_thread,NULL); 
 
     printf("Control thread id: %lx\n",pthread_self());
     printf("finished!\n");
