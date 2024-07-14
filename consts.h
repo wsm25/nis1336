@@ -12,4 +12,7 @@
 #define HASHEDPASSED_SIZE 64
 #define PASSWORD_SIZE 20
 
+#define DATADIR_SIZE 6
+#define DATADIR "data/"
+
 #endif // SCHEDULE_CONSTS_H

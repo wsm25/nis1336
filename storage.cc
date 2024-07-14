@@ -14,96 +14,160 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
-#include <string>
 
 #include "storage.h"
-#include "user.h"
-#include "task.h"
 
-struct Metadata{
-    unsigned used;
+struct Metadata
+{
+    size_t used;
 };
 
-Storage::Storage(const char* name){
-    if(strlen(name)>=20) return; // invalid name length
-    std::string path("data/");
-    path+=name;
-    const char* filepath=path.c_str();
-    fd=open(filepath, O_RDWR, 0666);
-    User user;
-    Metadata meta;
-    if(fd==-1){ // open failed, try create
-        fd=open(filepath, O_RDWR|O_CREAT, 0666);
-        if(fd==-1) goto error;
-        // TODO: init password
-        meta.used=sizeof(Metadata)+sizeof(User);
-        new(&user) User(name);
-        write(fd, &meta, sizeof(Metadata));
-        write(fd, &user, sizeof(User));
-        ftruncate(fd, meta.used+2*sizeof(Task)); // reserve 2 task space
-    } else {
-        if(read(fd, &meta, sizeof(Metadata))==-1) goto error;
-        if(read(fd, &user, sizeof(User))==-1) goto error;
-    }
-    // file status
-    struct stat sb;
-    if(fstat(fd, &sb)!=0) goto error;
-    original = mapsize = sb.st_size;
-    // mmap
-    if(mapsize<=0) goto error;
-    mapping = (char*)mmap(
-        0, mapsize, 
-        PROT_WRITE|PROT_READ,
-        MAP_SHARED,
-        fd, 0);
-    if(mapping==(char*)-1) goto error;
-    used=&((Metadata*)mapping)->used;
+Storage::Storage(): fd(-1), mapping(MAP_FAILED) {}
+
+Storage::Storage(const char *name): Storage()
+{
+    signin(name);
+}
+
+Storage::Storage(const User &user): Storage()
+{
+    signup(user);
+}
+
+Storage::~Storage()
+{
+    if(!fail()) signout();
+}
+
+bool Storage::fail() const
+{
+    return fd == -1 || mapping == MAP_FAILED;
+}
+
+void Storage::signup(const User &user)
+{
+    // create file
+    char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
+    strcat(filepath, user.name);
+    fd = open(filepath, O_RDWR | O_CREAT | O_EXCL, 0666);
+    if(fd == -1) return;
+
+    // initialize
+    Metadata meta = { sizeof(Metadata) + sizeof(User) };
+    mapsize = sizeof(Metadata) + sizeof(User) + 2 * sizeof(Task);
+    if(ftruncate(fd, mapsize) == -1) goto error; // reserve 2 task space
+    if(write(fd, &meta, sizeof(Metadata)) == -1) goto error;
+    if(write(fd, &user, sizeof(User)) == -1) goto error;
+
+    // memory map
+    mapping = mmap(NULL, mapsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if(mapping == MAP_FAILED) goto error;
+
+    used = &((Metadata *)mapping)->used;
+
 end:
     return;
 error:
-    fd=-1;
-    mapping=(char*)-1;
-    goto end;
-}
-
-Storage::~Storage(){
-    munmap(mapping, original);
     close(fd);
-    fd=-1;
+    fd = -1;
 }
 
-void Storage::cancel(){
-    std::string path("data/");
-    path+=user().name;
-    munmap(mapping, mapsize);
-    close(fd);
-    fd=-1;
-    remove(path.c_str());
-}
+void Storage::signin(const char *name)
+{
+    // open file
+    if(strlen(name) >= USERNAME_SIZE) return; // invalid name length
+    char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
+    strcat(filepath, name);
+    fd = open(filepath, O_RDWR, 0666);
+    if(fd == -1) return;
 
-User& Storage::user(){
-    return *(User*)(mapping+sizeof(Metadata));
-}
+    // check file
+    Metadata meta;
+    User user;
+    if(read(fd, &meta, sizeof(Metadata)) == -1) goto error;
+    if(read(fd, &user, sizeof(User)) == -1) goto error;
 
-Task* Storage::tasks(uint64_t& len){
-    len = (*used-sizeof(Metadata)-sizeof(User))/sizeof(Task);
-    return (Task*)(mapping+sizeof(Metadata)+sizeof(User));
-}
+    // file status
+    struct stat filestatus;
+    if(fstat(fd, &filestatus) == -1) goto error;
+    mapsize = filestatus.st_size;
 
-void Storage::insert_task(const Task& task){
-    if(*used+(ssize_t)sizeof(Task)>mapsize){ // allocate new block
-        mapsize=mapsize*3/2; // soundness: mapsize>tasksize*2
-        printf("new block: %d\n", mapsize);
-        ftruncate(fd, mapsize);
-        mapping = (char*)mmap(
-            0, mapsize, 
-            PROT_WRITE|PROT_READ,
-            MAP_SHARED,
-            fd, 0);
+    // memory map
+    mapping = mmap(NULL, mapsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if(mapping == MAP_FAILED)
+    {
+        close(fd);
+        fd = -1;
+        return;
     }
-    printf("insert at %d\n", *used);
-    memcpy(mapping+*used, &task, sizeof(Task));
-    *used+=sizeof(Task);
+
+    used = &((Metadata *)mapping)->used;
+
+end:
+    return;
+error:
+    close(fd);
+    fd = -1;
+}
+
+void Storage::signout()
+{
+    munmap(mapping, mapsize);
+    mapping = MAP_FAILED;
+    close(fd);
+    fd = -1;
+}
+
+void Storage::cancel()
+{
+    char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
+    strcat(filepath, user().name);
+    signout();
+    remove(filepath);
+}
+
+User &Storage::user()
+{
+    return *(User *)((uint8_t *)mapping + sizeof(Metadata));
+}
+
+Task *Storage::tasks(uint64_t &len)
+{
+    len = (*used - sizeof(Metadata) - sizeof(User)) / sizeof(Task);
+    return (Task *)((uint8_t *)mapping + sizeof(Metadata) + sizeof(User));
+}
+
+void Storage::insert_task(const Task &task)
+{
+    // allocate new block
+    if(*used + sizeof(Task) > mapsize)
+    {
+        // dellocate
+        munmap(mapping, mapsize);
+
+        // resize the file
+        mapsize = mapsize * 3 / 2; // soundness: mapsize > tasksize * 2
+        if(ftruncate(fd, mapsize) == -1) goto error;
+        printf("new block: %lu\n", mapsize);
+
+        // memory map
+        mapping = mmap(NULL, mapsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if(mapping == MAP_FAILED) goto error;
+
+        // initialize
+        used = &((Metadata *)mapping)->used;
+    }
+
+    // insert new task
+    memcpy((uint8_t *)mapping + *used, &task, sizeof(Task));
+    *used += sizeof(Task);
+    printf("insert at %lu\n", *used);
+
+end:
+    return;
+error:
+    close(fd);
+    fd = -1;
 }
 
 #endif
