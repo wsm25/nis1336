@@ -16,26 +16,32 @@ public:
     ///modifier
     bool insert(const Task &task);
     ///element
+    Task *data();
+    const Task *data() const;
+    uint64_t size() const;
     Task &operator[](uint64_t taskID);
+    Task &at(uint64_t taskID);
     ///select
     //general
-    std::vector<uint64_t> select(std::function<bool(const Task &)> pred);
+    std::vector<uint64_t> select(std::function<bool(const Task &)> pred) const;
+    std::vector<uint64_t> select(std::function<bool(Task &)> pred);
     //equal
-    std::vector<uint64_t> select(const Task &);
+    std::vector<uint64_t> select(const Task &) const;
     //member
     template<class Member>
-    std::vector<uint64_t> select(Member Task:: *pointer, Member value);
+    std::vector<uint64_t> select(Member Task:: *pointer, Member value) const;
     ///sort
     //general
-    std::vector<uint64_t> sort(std::function<bool(const Task &, const Task &)> cmp);
+    std::vector<uint64_t> sort(std::function<bool(const Task &, const Task &)> cmp) const;
     //member
     template<class Member>
-    std::vector<uint64_t> sort(Member Task:: *pointer, std::function<bool(const Member &, const Member &)> cmp = std::less<Member>());
+    std::vector<uint64_t> sort(Member Task:: *pointer, 
+        std::function<bool(const Member &, const Member &)> cmp = std::less<Member>()) const;
 };
 
 //inline
 template<class Member>
-inline std::vector<uint64_t> Tasks::select(Member Task:: *pointer, Member value)
+inline std::vector<uint64_t> Tasks::select(Member Task:: *pointer, Member value) const
 {
     return select([&](const Task &x) -> bool
         {
@@ -44,7 +50,8 @@ inline std::vector<uint64_t> Tasks::select(Member Task:: *pointer, Member value)
 }
 
 template<class Member>
-inline std::vector<uint64_t> Tasks::sort(Member Task:: *pointer, std::function<bool(const Member &, const Member &)> cmp)
+inline std::vector<uint64_t> Tasks::sort(Member Task:: *pointer, 
+    std::function<bool(const Member &, const Member &)> cmp) const
 {
     return sort([&](const Task &x, const Task &y)
         {

@@ -14,6 +14,27 @@ bool Tasks::insert(const Task &t)
         return false;
 }
 
+Task *Tasks::data()
+{
+    uint64_t len;
+    Task *arr = s->tasks(len);
+    return arr;
+}
+
+const Task *Tasks::data() const
+{
+    uint64_t len;
+    Task *arr = s->tasks(len);
+    return arr;
+}
+
+uint64_t Tasks::size() const
+{
+    uint64_t len;
+    Task *arr = s->tasks(len);
+    return len;
+}
+
 Task &Tasks::operator[](uint64_t ID)
 {
     uint64_t len;
@@ -23,7 +44,16 @@ Task &Tasks::operator[](uint64_t ID)
     return arr[ID];
 }
 
-std::vector<uint64_t> Tasks::select(std::function<bool(const Task &)> pred)
+Task &Tasks::at(uint64_t ID)
+{
+    uint64_t len;
+    Task *arr = s->tasks(len);
+
+    if(ID >= len) throw std::out_of_range("Task &Tasks::operator[](uint64_t)");
+    return arr[ID];
+}
+
+std::vector<uint64_t> Tasks::select(std::function<bool(const Task &)> pred) const
 {
     uint64_t len;
     Task *arr = s->tasks(len);
@@ -35,7 +65,19 @@ std::vector<uint64_t> Tasks::select(std::function<bool(const Task &)> pred)
     return v;
 }
 
-std::vector<uint64_t> Tasks::select(const Task &t)
+std::vector<uint64_t> Tasks::select(std::function<bool(Task &)> pred)
+{
+    uint64_t len;
+    Task *arr = s->tasks(len);
+
+    std::vector<uint64_t> v;
+    for(uint64_t i = 0; i < len; ++i)
+        if(pred(arr[i]))
+            v.push_back(i);
+    return v;
+}
+
+std::vector<uint64_t> Tasks::select(const Task &t) const
 {
     return select([&t](const Task &x) -> bool
         {
@@ -43,7 +85,7 @@ std::vector<uint64_t> Tasks::select(const Task &t)
         });
 }
 
-std::vector<uint64_t> Tasks::sort(std::function<bool(const Task &, const Task &)> cmp)
+std::vector<uint64_t> Tasks::sort(std::function<bool(const Task &, const Task &)> cmp) const
 {
     uint64_t len;
     Task *arr = s->tasks(len);
@@ -57,3 +99,4 @@ std::vector<uint64_t> Tasks::sort(std::function<bool(const Task &, const Task &)
         });
     return v;
 }
+
