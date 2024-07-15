@@ -56,6 +56,6 @@
         "map": "cpp"
     },
     "C_Cpp.default.includePath": [
-        "${workspaceFolder}/Hash/src"
+        "${workspaceFolder}"
     ]
 }
