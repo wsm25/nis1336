@@ -4,6 +4,8 @@
 #include "task.h"
 #include "user.h"
 
+#include <stddef.h> // size_t
+
 class Storage
 {
 private:
@@ -11,6 +13,9 @@ private:
     void *mapping; // mapping address
     size_t *used; // used size
     size_t mapsize; // mapping size
+
+    // reserve the file size to `capacity` if it is smaller; remap the memory anyway
+    void reserve(size_t capacity);
 public:
     /// construct/destruct
     // Default
