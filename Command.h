@@ -11,6 +11,7 @@
 #include "tasks.h"
 #include "unistd.h"
 
+
 // 解析包含日期和时间的字符串为tm结构
 inline std::tm parseDateTime(const std::string& dateTimeStr)
 {
@@ -77,22 +78,14 @@ inline void quit(std::istringstream &iss, bool &flag, Storage &using_file)
 
 inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
 {
-   /*std::cout << "Enter your task: " << std::endl;
-   std::string inputLine;
-   // 使用getline读取整行输入，包括空格
-   getline(std::cin, inputLine);
-    // 当用户仅按回车没有输入内容时，inputLine将为空，这里作为退出条件处理
-    if (inputLine.empty()) 
-    {
-        std::cout << "未输入任何内容。" << std::endl;
-        return ;
-    }
-    // 使用istringstream来分割字符串
-    std::istringstream iss(inputLine);*/
+   
     std::string word;
     // 用来存储分割后的单词
     std::vector<std::string> words;
     Task t;
+    //防止先输入-e或者-r,再输入-b将其覆盖
+    bool end_set = false;
+    bool remind_set = false;
      // 循环读取每个单词
     while (iss >> word) 
         words.push_back(word);
@@ -115,7 +108,13 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
         //此时it为输入参数
         i++;
         const char* Con = words[i].c_str();
-        if (*it == "-c")
+        if(*it == "-n")
+        {
+            it++;
+            t.name = Con;
+        }
+
+        else if (*it == "-c")
         { 
             it++;
             if(std::strlen(Con) >= TASKCONTENT_SIZE)
@@ -128,22 +127,37 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
                 t.content[i] = Con[i];
             t.content[i] = '\0';
         }
-        //TODO
+        
         else if (*it == "-b")
         {
-            i++;
-            const char* Con = words[i].c_str();
-            char*date = new char[25];
-            for (int j = 0;Con[j] != '\0'; ++j)
-                date[j] = Con[j];
-            date[10] = ' ';
+            it++;
+            std::string str(Con);
+            t.begin = convertToTimeT(str);
+            if(!end_set)
+                t.end = t.begin;
+            if(!remind_set)
+                t.remind.t = t.begin;
+        }
 
+        else if (*it == "-e")
+        {
+            it++;
+            std::string str(Con);
+            t.end = convertToTimeT(str);
+            end_set = true;
+        }
+
+        else if (*it == "-r")
+        {
+            it++;
+            std::string str(Con);
+            t.remind.t = convertToTimeT(str);
+            remind_set = true;
         }
 
         else if(*it == "-p")
         {
-            i++;
-            const char* Con = words[i].c_str();
+            it++;
             if(!strcmp(Con,"Low")) 
                 t.priority = Task::Low;
             else if(!strcmp(Con,"Mid"))
@@ -154,8 +168,7 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
 
         else if(*it == "-t")
         {
-            i++;
-            const char* Con = words[i].c_str();
+            it++;
             if(strlen(Con) >= TAGNAME_SIZE)
             {
                 std::cerr << "Tag is too long" << std::endl;
