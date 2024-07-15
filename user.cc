@@ -3,24 +3,19 @@
 #include <iostream>
 #include <cstring>
 
-#include "storage.h"
 #include "user.h"
-#include "task.h"
-
-
-using namespace std;
 
 /// Initialize all fields
-User :: User(const char* username)
+User::User(const char *username)
 {
     // invalid name length
-    if(strlen(username)>=20)
+    if(strlen(username) >= USERNAME_SIZE)
     {
-        cout << "Your name is too long" << endl;
-        return; 
+        std::cerr << "Your name is too long" << std::endl;
+        return;
     }
     int i = 0;
-    for (;username[i] != '\0' ;++i)
+    for(;username[i] != '\0';++i)
         name[i] = username[i];
     name[i] = '\0';
     pwdunset = true;
@@ -32,28 +27,28 @@ User :: User(const char* username)
 /// Add a tag. If tags exists, increase its count;
 /// if tag is too long, or tag array is full, return false.
 ///tags[] is 0-based
-bool User :: add_tag(const char* tag)
+bool User::add_tag(const char *tag)
 {
     int taglen = strlen(tag);
-    if (taglen > TAGNAME_SIZE || (tagcount+1) > MAX_TAGS_PER_USER) 
+    if(taglen > TAGNAME_SIZE || (tagcount + 1) > MAX_TAGS_PER_USER)
     {
-        cout << "OVERFLOW" << endl;
+        std::cerr << "OVERFLOW" << std::endl;
         return false;
     }
-    
-    strcpy(tags[tagcount],tag);
-    tagcount ++;
+
+    strcpy(tags[tagcount], tag);
+    tagcount++;
     return true;
 }
 
 /// Set password 
-bool User :: set_password(const char* password)
+bool User::set_password(const char *password)
 {
     //invalid password length
-    if(strlen(password)>=20)
+    if(strlen(password) >= PASSWORD_SIZE)
     {
-        cout << "Your password is too long" << endl;
-        return false; 
+        std::cerr << "Your password is too long" << std::endl;
+        return false;
     }
     hashpwd.initialize(password);
     pwdunset = false;
@@ -61,11 +56,11 @@ bool User :: set_password(const char* password)
 }
 
 /// Verify password 
-bool User :: verify_password(const char* password)
+bool User::verify_password(const char *password)
 {
     HashedPassword hashed_input_password;
     hashed_input_password.initialize(password);
-    if(strcmp(hashed_input_password.hashedPassword,hashpwd.hashedPassword) == 0)
+    if(strcmp(hashed_input_password.hashedPassword, hashpwd.hashedPassword) == 0)
         return true;
     else return false;
 }

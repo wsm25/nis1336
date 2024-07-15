@@ -1,13 +1,18 @@
+#ifndef COMMAND_H
+#define COMMAND_H
+
+
 #include<iostream>
 #include <sstream>
 #include <vector>
 #include <iomanip>
 #include <ctime>
-#include"storage.h"
-#include"tasks.h"
+#include <unordered_map>
+#include "tasks.h"
+#include "unistd.h"
 
 // 解析包含日期和时间的字符串为tm结构
-std::tm parseDateTime(const std::string& dateTimeStr)
+inline std::tm parseDateTime(const std::string& dateTimeStr)
 {
     std::tm tmTime = {};
     std::istringstream iss(dateTimeStr);
@@ -34,7 +39,7 @@ std::tm parseDateTime(const std::string& dateTimeStr)
 }
 
 // 将输入字符串转换为time_t类型
-time_t convertToTimeT(const std::string& input) 
+inline time_t convertToTimeT(const std::string& input) 
 {
     std::tm currentTime = {};
     if (input.find('/') != std::string::npos) // 包含日期
@@ -65,9 +70,14 @@ time_t convertToTimeT(const std::string& input)
 }
 
 
-void addtask(Storage &using_file)
+inline void quit(std::istringstream &iss, bool &flag, Storage &using_file)
 {
-   std::cout << "Enter your task: " << std::endl;
+    flag = false;
+}
+
+inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
+{
+   /*std::cout << "Enter your task: " << std::endl;
    std::string inputLine;
    // 使用getline读取整行输入，包括空格
    getline(std::cin, inputLine);
@@ -78,7 +88,7 @@ void addtask(Storage &using_file)
         return ;
     }
     // 使用istringstream来分割字符串
-    std::istringstream iss(inputLine);
+    std::istringstream iss(inputLine);*/
     std::string word;
     // 用来存储分割后的单词
     std::vector<std::string> words;
@@ -105,14 +115,14 @@ void addtask(Storage &using_file)
         //此时it为输入参数
         i++;
         const char* Con = words[i].c_str();
-        if (*it == "-n")
+        if (*it == "-c")
         { 
             it++;
             if(std::strlen(Con) >= TASKCONTENT_SIZE)
             {
                 std::cerr << "Length is out of range" << std::endl;
                 return;
-            } 
+            }
             int i = 0;
             for (; Con[i] != '\0'; ++i)
                 t.content[i] = Con[i];
@@ -157,7 +167,6 @@ void addtask(Storage &using_file)
             t.tags[j] = '\0';
         }
 
-        delete[]Con;
         if(it == words.end()) break;
         it++;
         i++;
@@ -165,11 +174,10 @@ void addtask(Storage &using_file)
     return;
 }
 
-void deltask(Storage &using_file)
+inline void deltask(std::istringstream &iss, bool &flag, Storage &using_file)
 {
-    std::cout << "Enter your task ID: " << std:: endl;
     int id;
-    std::cin >> id;
+    iss >> id;
     Tasks using_tasks(using_file);
     Task *arr = using_tasks.data();
     arr[id].status = Task::Abort;
@@ -177,24 +185,20 @@ void deltask(Storage &using_file)
 }
 
 //show by remind_time
-void showtask(Storage &using_file)
+inline void showtask(std::istringstream &iss, bool &flag, Storage &using_file)
 {
     Tasks using_tasks(using_file);
-    uint64_t len;
-    Task *arr = using_file.tasks(len);
     auto v = using_tasks.sort(&Task::remind);
-    int i = 0;
-    int length = v.size();
-    for(;i < length; ++ i)
+    for(auto i : v)
     {
-        if(arr[v[i]].status == Task::Unfinished && !arr[v[i]].remind.isReminded)
-            std::cout << arr[v[i]].name << std::endl;
+        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+            std::cout << using_tasks[i].name << std::endl;
     }
     return;
 }
 
 //第一次打开文件的操作
-bool Open_By_Username(const char* user_name,const char* your_password,Storage &using_file)
+inline bool Open_By_Username(const char* user_name,const char* your_password,Storage &using_file)
 {
     using_file.user();
     if(using_file.fail())
@@ -214,11 +218,42 @@ bool Open_By_Username(const char* user_name,const char* your_password,Storage &u
         return false;
     }
 
-    else if(using_file.user().verify_password(your_password))
+    else
     {
         std::cout << "Open your account successfully!" << std::endl;
         return true;
     }
-
-    Tasks tasks(using_file);
 }
+
+
+inline void *Remind(void *arg)
+{
+    //参数强转成Tasks类
+    Tasks *using_tasks = (Tasks *)arg;
+    while(true)
+    {
+        auto v = using_tasks->select(
+            [&](Task &task) -> bool {
+                return (task.status == Task::Unfinished && task.remind.check());
+            }
+        );
+
+        //输出任务提醒
+        Task remind_task;
+        for(auto i : v)
+        {
+            remind_task = (*using_tasks)[i];
+            std::cout << "Time for: " << remind_task.name << std::endl;
+        }
+        sleep(5);
+    }
+
+    return (void *)0;
+}
+
+void shell();
+
+// 命令数组
+const std::unordered_map<std::string, void(*)(std::istringstream &, bool &, Storage &)> cmds = {{"quit", quit}, {"addtask", addtask}, {"showtask", showtask}, {"deltask", deltask}};
+
+#endif

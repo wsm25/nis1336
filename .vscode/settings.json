@@ -52,7 +52,8 @@
         "sstream": "cpp",
         "chrono": "cpp",
         "ratio": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "map": "cpp"
     },
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/Hash/src"
