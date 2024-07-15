@@ -1,4 +1,0 @@
-[submodule "tests/catch2"]
-	path = tests/catch2
-	url = https://github.com/catchorg/Catch2.git
-	branch = v2.x

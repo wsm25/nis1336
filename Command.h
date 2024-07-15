@@ -177,19 +177,29 @@ void deltask(Storage &using_file)
 }
 
 //show by remind_time
-void showtask()
+void showtask(Storage &using_file)
 {
-
+    Tasks using_tasks(using_file);
+    uint64_t len;
+    Task *arr = using_file.tasks(len);
+    auto v = using_tasks.sort(&Task::remind);
+    int i = 0;
+    int length = v.size();
+    for(;i < length; ++ i)
+    {
+        if(arr[v[i]].status == Task::Unfinished && !arr[v[i]].remind.isReminded)
+            std::cout << arr[v[i]].name << std::endl;
+    }
+    return;
 }
 
 //第一次打开文件的操作
 bool Open_By_Username(const char* user_name,const char* your_password,Storage &using_file)
 {
-    User user;
-    user = using_file.user();
+    using_file.user();
     if(using_file.fail())
     {
-        if(user.set_password(your_password))
+        if(using_file.user().set_password(your_password))
         {
             std::cout << "Create your account successfully" << std::endl;
             return true;
@@ -198,13 +208,13 @@ bool Open_By_Username(const char* user_name,const char* your_password,Storage &u
         return false;
     }
 
-    else if(!user.verify_password(your_password))
+    else if(!using_file.user().verify_password(your_password))
     {
         std::cout << "Your password is wrong" << std::endl;
         return false;
     }
 
-    else if(user.verify_password(your_password))
+    else if(using_file.user().verify_password(your_password))
     {
         std::cout << "Open your account successfully!" << std::endl;
         return true;
