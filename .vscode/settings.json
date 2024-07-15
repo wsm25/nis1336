@@ -48,7 +48,11 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "assert": "cpp"
+        "assert": "cpp",
+        "sstream": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "iomanip": "cpp"
     },
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/Hash/src"

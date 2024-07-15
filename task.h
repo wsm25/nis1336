@@ -41,6 +41,10 @@ struct Task
     Priority priority;
     Status status;
     char content[TASKCONTENT_SIZE];
+
+    //construct
+    Task();
+    Task(std::string con);
 };
 
 #endif // SCHEDULE_TASK_H

@@ -8,12 +8,12 @@
  * - addtask [arguments]                    add task to schedule. no repaet begin time
  *   Arguments:
  *    -n <name>             set task name. no more than TASKNAME_SIZE. default: "new task"
- *    -b <time>             set begin time. <time>: [YYYY/MM/DD] HH:MM:SS. default: now
+ *    -b <time>             set begin time. <time>: [YYYY/MM/DD]-HH:MM:SS. default: now
  *    -e <time>             set end time. default: begin time
  *    -r <time>             set remind time. default: begin time
  *    -p low|middle|high    set priority. default: none
  *    -c <content>          set content. no more than TASKCONTENT_SIZE. default: ""
- *    -t tag1,tag2,..       set tags. no more than MAX_TAGS_PER_TASK. default: null
+ *    -t tag                set tags. no more than MAX_TAGS_PER_TASK. default: null
  *    -f                    overwrite if task exists
  *
  * - showtask [arguments]                   show task with given filter and given order
@@ -21,8 +21,8 @@
  *    -b HH:MM:SS           earliest task time. default: 00:00:00
  *    -e HH:MM:SS           latest task time. default: 23:59:59
  *    -d <days>             show tasks in next n days. default: 1(today)
- *    -p pri1,pri2..        show task with given priority. default: all
- *    -t tag1,tag2,..       show tasks with given tags. default: null
+ *    -p pri                show task with given priority. default: all
+ *    -t tag                show tasks with given tags. default: null
  *    -o <order>            show tasks with given order. <order>:
  *
  * - edittask <taskID> [arguments]          edit task with given ID
@@ -78,7 +78,7 @@ void *Remind(void *arg)
     {
         auto v = using_tasks->select(
             [&](Task &task) -> bool {
-                return task.remind.check();
+                return (task.status == Task::Unfinished && task.remind.check());
             }
         );
 
