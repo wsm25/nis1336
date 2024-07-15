@@ -36,7 +36,4 @@ void shell()
         cmds.at(command)(iss, flag, using_file);
 
     }
-
-    ///等待线程结束,释放线程的资源 
-    pthread_join(remind_thread, NULL);
 }

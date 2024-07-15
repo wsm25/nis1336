@@ -16,9 +16,9 @@ bool remind_t::check()
         return false;
 }
 
-Task::Task():priority(None),status(Unfinished),begin(time(NULL)),end(time(NULL))
+Task::Task():priority(None),status(Unfinished),begin(time(NULL)),end(time(NULL)), content()
 {
-    content[0] = 'N';content[1] = 'O';content[2] = 'N';content[3] = 'E';content[4] = '\0';
+    name = "new task";
 }
 Task::Task(std::string con):priority(None),status(Unfinished),begin(time(NULL)),end(time(NULL))
 {

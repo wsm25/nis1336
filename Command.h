@@ -129,7 +129,7 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
             t.content[i] = '\0';
         }
         //TODO
-        if (*it == "-b")
+        else if (*it == "-b")
         {
             i++;
             const char* Con = words[i].c_str();
@@ -140,7 +140,7 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
 
         }
 
-        if(*it == "-p")
+        else if(*it == "-p")
         {
             i++;
             const char* Con = words[i].c_str();
@@ -152,7 +152,7 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
                 t.priority = Task::High; 
         }
 
-        if(*it == "-t")
+        else if(*it == "-t")
         {
             i++;
             const char* Con = words[i].c_str();
@@ -171,6 +171,7 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
         it++;
         i++;
     }//while结束
+    using_file.insert_task(t);
     return;
 }
 
