@@ -12,7 +12,7 @@ int main()
     my_user.add_tag("read");
     my_user.set_password("haha666");
     my_user.get_inform();
-    bool flag = my_user.verify_password("nana666");
+    bool flag = my_user.verify_password("haha666");
     if(flag)
         cout << "yes" << endl;
     else
