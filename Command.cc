@@ -5,6 +5,7 @@
 #include <vector>
 #include <ctime>
 #include <unistd.h>
+#include <utility>
 
 
 // auxiliary function
@@ -12,7 +13,7 @@
 // error message
 int invalidCommand(std::istringstream &iss)
 {
-    std::cerr << "Invalid command:" << iss.str() << "\ntry help" << std::endl;
+    std::cerr << "Invalid command: " << iss.str() << "\ntry help" << std::endl;
     return 1;
 }
 
@@ -24,6 +25,7 @@ void parseUsernameHint(std::istringstream &iss, std::string &username)
     {
         std::cout << "Username: ";
         std::cin >> username;
+        std::cin.get(); // discard newline
     }
     else
         iss >> username;
@@ -35,7 +37,6 @@ void parsePwdHint(std::istringstream &iss, std::string &password)
     if(iss.eof())
     {
         password = std::string(getpass("Password: "));
-        std::cin.get(); // discard newline
     }
     else
         iss >> password;
@@ -393,27 +394,29 @@ int selecttask(std::istringstream &iss, bool &flag, Storage &using_file)
     return 0;
 }
 
-void *remind(void *arg)
+void *remind(void *args)
 {
     // find tasks to remind
-    Tasks *using_tasks = (Tasks *)arg;
+    Tasks *using_tasks = ((std::pair<Tasks *, bool *> *)args)->first;
+    bool *isstopped = ((std::pair<Tasks *, bool *> *)args)->second;
+    
     while(true)
     {
         auto v = using_tasks->select(
-            [&](Task &task) -> bool {
+            [&](const Task &task) -> bool {
                 return (task.status == Task::Unfinished && task.remind.check());
             }
         );
 
         // print remind
-        Task remind_task;
         for(auto i : v)
         {
-            remind_task = (*using_tasks)[i];
-            std::cout << "\a\n\nTime for: " << remind_task.name << "\n\n";
-            remind_task.remind.isReminded == true;
+            Task &remind_task = (*using_tasks)[i];
+            std::cout << "\n\nTime for: " << remind_task.name << std::endl;
+            remind_task.remind.isReminded = true;
         }
-        sleep(1); // avoid blocking
+        // sleep(5); // avoid blocking
+        if(*isstopped) break;
     }
 
     return nullptr;

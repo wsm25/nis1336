@@ -17,7 +17,7 @@ struct remind_t
     remind_t();
     remind_t(tm &tm);
     //check whether it is time to remind; if it is, then let isReminded = true;
-    bool check();
+    bool check() const;
     //compare
     friend bool operator==(const remind_t &t1, const remind_t &t2);
     friend bool operator!=(const remind_t &t1, const remind_t &t2);

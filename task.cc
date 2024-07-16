@@ -5,15 +5,9 @@
 remind_t::remind_t(): t(time(NULL)), isReminded(false) {}
 remind_t::remind_t(tm &tm): t(mktime(&tm)), isReminded(false) {}
 
-bool remind_t::check()
+bool remind_t::check() const
 {
-    if(t <= time(NULL) && !isReminded)
-    {
-        isReminded = true;
-        return true;
-    }
-    else
-        return false;
+    return (t <= time(NULL) && !isReminded);
 }
 
 Task::Task():priority(None),status(Unfinished),begin(time(NULL)),end(time(NULL)), content()

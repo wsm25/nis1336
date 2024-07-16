@@ -1,10 +1,12 @@
 #include "tasks.h"
 #include <algorithm>
+#include <stdexcept>
 
 Tasks::Tasks(Storage &stor): s(&stor) {}
 
 bool Tasks::insert(const Task &t)
 {
+    if(s->fail()) throw std::runtime_error("Out of memory");
     if(select(t).empty())
     {
         s->insert_task(t);
@@ -16,6 +18,7 @@ bool Tasks::insert(const Task &t)
 
 Task *Tasks::data()
 {
+    if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
     Task *arr = s->tasks(len);
     return arr;
@@ -23,6 +26,7 @@ Task *Tasks::data()
 
 const Task *Tasks::data() const
 {
+    if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
     Task *arr = s->tasks(len);
     return arr;
@@ -30,6 +34,7 @@ const Task *Tasks::data() const
 
 uint64_t Tasks::size() const
 {
+    if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
     Task *arr = s->tasks(len);
     return len;
@@ -37,6 +42,7 @@ uint64_t Tasks::size() const
 
 Task &Tasks::operator[](uint64_t ID)
 {
+    if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
     Task *arr = s->tasks(len);
 
@@ -46,6 +52,7 @@ Task &Tasks::operator[](uint64_t ID)
 
 Task &Tasks::at(uint64_t ID)
 {
+    if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
     Task *arr = s->tasks(len);
 
@@ -55,18 +62,7 @@ Task &Tasks::at(uint64_t ID)
 
 std::vector<uint64_t> Tasks::select(std::function<bool(const Task &)> pred) const
 {
-    uint64_t len;
-    Task *arr = s->tasks(len);
-
-    std::vector<uint64_t> v;
-    for(uint64_t i = 0; i < len; ++i)
-        if(pred(arr[i]))
-            v.push_back(i);
-    return v;
-}
-
-std::vector<uint64_t> Tasks::select(std::function<bool(Task &)> pred)
-{
+    if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
     Task *arr = s->tasks(len);
 
@@ -87,6 +83,7 @@ std::vector<uint64_t> Tasks::select(const Task &t) const
 
 std::vector<uint64_t> Tasks::sort(std::function<bool(const Task &, const Task &)> cmp) const
 {
+    if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
     Task *arr = s->tasks(len);
 

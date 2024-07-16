@@ -24,7 +24,6 @@ public:
     ///select
     //general
     std::vector<uint64_t> select(std::function<bool(const Task &)> pred) const;
-    std::vector<uint64_t> select(std::function<bool(Task &)> pred);
     //equal
     std::vector<uint64_t> select(const Task &) const;
     //member

@@ -42,17 +42,17 @@ namespace schedule
 
 namespace user
 {
-    void help(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void signout(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void editname(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void editpwd(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void cancel(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void addtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void edittask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void showtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
-    void deltask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks);
+    void help(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void signout(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void editname(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void editpwd(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void cancel(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void addtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void edittask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void showtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+    void deltask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
 
-    typedef std::unordered_map<std::string, void(*)(std::istringstream &, bool &, Storage &, Tasks &)> CMDS;
+    typedef std::unordered_map<std::string, void(*)(std::istringstream &, bool &, Storage &, Tasks &, pthread_t)> CMDS;
     const CMDS cmds = {{"help", help}, 
         {"signout", signout}, {"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel}, 
         {"addtask", addtask}, {"edittask", edittask}, {"showtask", showtask}, {"deltask", deltask}};

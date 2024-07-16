@@ -29,19 +29,20 @@ int schedule::shell()
 int user::shell(Storage &using_file)
 {
     Tasks using_tasks(using_file);
+    bool isstopped = false;
+    std::pair<Tasks *, bool *> args = {&using_tasks, &isstopped};
 
     pthread_t remind_thread;
 
     ///asynchronize std::cin and std::cout
     std::ios::sync_with_stdio(false);
 
-    if(errno = pthread_create(&remind_thread, NULL, remind, (void *)&using_tasks))
+    if(errno = pthread_create(&remind_thread, NULL, remind, (void *)&args))
     {
         perror("remind thread: ");
         return 1;
     }
 
-    bool isstopped = false;
     while(true)
     {
         std::cout << "(" << using_file.user().Name() << ") ";
@@ -57,7 +58,7 @@ int user::shell(Storage &using_file)
         if(it == cmds.end())
             ::invalidCommand(iss);
         else
-            it->second(iss, isstopped, using_file, using_tasks);
+            it->second(iss, isstopped, using_file, using_tasks, remind_thread);
         if(isstopped) return 0;
     }
     return 1;
@@ -76,7 +77,7 @@ void schedule::quit(std::istringstream &iss, bool &isstopped)
 void schedule::help(std::istringstream &iss, bool &isstopped)
 {
     if(iss.eof())
-        std::cout << HELP_SCHEDULE <<std::endl;
+        std::cout << HELP_SCHEDULE << std::endl;
     else
         ::invalidCommand(iss);
 }
@@ -96,7 +97,7 @@ void schedule::signup(std::istringstream &iss, bool &isstopped)
 }
 
 //user::shell
-void user::help(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::help(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
     if(iss.eof())
         std::cout << HELP_USER << std::endl;
@@ -104,44 +105,56 @@ void user::help(std::istringstream &iss, bool &isstopped, Storage &using_file, T
         ::invalidCommand(iss);
 }
 
-void user::signout(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::signout(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
-    if(::signout(iss, using_file) == 0)
+    if(iss.eof())
+    {
         isstopped = true;
+        pthread_join(remind_thread, NULL);
+        using_file.signout();
+    }
+    else
+        invalidCommand(iss);
 }
 
-void user::editname(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::editname(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
     ::editname(iss, using_file);
 }
 
-void user::editpwd(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::editpwd(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
     ::editpwd(iss, using_file);
 }
 
-void user::cancel(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::cancel(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
-    if(::cancel(iss, using_file) == 0)
+    if(iss.eof())
+    {
         isstopped = true;
+        pthread_join(remind_thread, NULL);
+        using_file.cancel();
+    }
+    else
+        invalidCommand(iss);
 }
 
-void user::addtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::addtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
     ::addtask(iss, using_tasks);
 }
 
-void user::edittask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::edittask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
     ::edittask(iss, using_tasks);
 }
 
-void user::showtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::showtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
     ::showtask(iss, using_tasks);
 }
 
-void user::deltask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks)
+void user::deltask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
 {
     ::deltask(iss, using_tasks);
 }
