@@ -411,6 +411,7 @@ void *remind(void *arg)
         {
             remind_task = (*using_tasks)[i];
             std::cout << "\a\n\nTime for: " << remind_task.name << "\n\n";
+            remind_task.remind.isReminded == true;
         }
         sleep(1); // avoid blocking
     }

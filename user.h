@@ -5,7 +5,7 @@
 #include "consts.h"
 // include the header "pathToLib/sha1.h" to use sha_512
 // If you are using C++14 or C++17, don't forget the "gsl" folder!
-#include "Hash/src/sha1.h"
+#include "Hash/src/sha2_512.h"
 #include <iostream>
 #include <cstring>
 #include <string>
@@ -16,16 +16,16 @@ struct HashedPassword {
     void initialize(const char *password)
     {
         // Get an instance
-        Chocobo1::SHA1 sha1;
+        Chocobo1::SHA2_512 sha2;
 
         // Feed data & data length to it
-        sha1.addData(password, strlen(password));
+        sha2.addData(password, strlen(password));
 
         // Tell it to wrap it up
-        sha1.finalize();
+        sha2.finalize();
 
         // Profit! oops, not really...
-        std::string str_hashedPassword = sha1.toString();
+        std::string str_hashedPassword = sha2.toString();
 
         //turn string to char
         int i = 0;
