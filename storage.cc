@@ -177,6 +177,13 @@ bool Storage::edit_name(const char *name)
     char newname[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
     strcat(newname, user().Name());
 
+    if(access(newname, F_OK) == 0)
+    {
+        user().set_username(tmp);
+        std::cerr << "editname: Username exists" << std::endl;
+        return false;
+    }
+
     if(rename(oldname, newname) == -1)
     {
         user().set_username(tmp);

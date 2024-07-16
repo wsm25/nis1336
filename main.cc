@@ -24,15 +24,17 @@ int main(int argc, char *argv [])
         Storage storage;
         if(terminal::signin(argv[1], argv[2], storage)) return 1;
         Tasks tasks(storage);
-
-        std::string command = argv[3];
-        std::string inputLine;
+        
+        std::string inputLine(argv[3]);
         for(int i = 4; i < argc; ++i)
         {
             inputLine += ' ';
             inputLine += argv[i];
         }
+
         std::istringstream iss(inputLine);
+        std::string command;
+        iss >> command;
 
         terminal::CMDS::const_iterator it = terminal::cmds.find(command);
         if(it != terminal::cmds.end())

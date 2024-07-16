@@ -13,7 +13,10 @@ bool Tasks::insert(const Task &t)
         return true;
     }
     else
+    {
+        std::cerr << "addtask: Task repeats" << std::endl;
         return false;
+    }
 }
 
 Task *Tasks::data()
