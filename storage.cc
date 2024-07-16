@@ -15,8 +15,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-
-#include <chrono>
+#include <iostream>
 #include "storage.h"
 
 struct Metadata
@@ -50,6 +49,7 @@ error:
     mapsize = 0;
     close(fd);
     fd = -1;
+    perror("reserve");
 }
 
 Storage::Storage(): fd(-1), mapping(MAP_FAILED), mapsize(0) {}
@@ -81,9 +81,14 @@ void Storage::signup(const User &user)
 
     // create file
     char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
-    strcat(filepath, user.name);
+    strcat(filepath, user.Name());
     fd = open(filepath, O_RDWR | O_CREAT | O_EXCL, 0666);
-    if(fd == -1) return;
+    if(fd == -1)
+    {
+        if(errno == EEXIST) std::cerr << "signup: Username exists" << std::endl;
+        else perror("signup");
+        return;
+    }
 
     // initialize
     Metadata meta = { sizeof(Metadata) + sizeof(User) };
@@ -96,6 +101,7 @@ end:
 error:
     close(fd);
     fd = -1;
+    perror("signup");
 }
 
 void Storage::signin(const char *name)
@@ -104,18 +110,27 @@ void Storage::signin(const char *name)
     if(!fail()) signout();
 
     // open file
-    if(strlen(name) >= USERNAME_SIZE) return; // invalid name length
+    if(strlen(name) >= USERNAME_SIZE) // invalid name length
+    {
+        std::cerr << "User: Your name is too long" << std::endl;
+        return;
+    }
     char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
     strcat(filepath, name);
     fd = open(filepath, O_RDWR, 0666);
-    if(fd == -1) return;
+    if(fd == -1)
+    {
+        if(errno == ENOENT) std::cerr << "signin: No such user" << std::endl;
+        else perror("signin");
+        return;
+    }
 
     // check file
     Metadata meta;
     User user;
     if(read(fd, &meta, sizeof(Metadata)) == -1) goto error;
     if(read(fd, &user, sizeof(User)) == -1) goto error;
-    if(strcmp(name, user.name)) { errno = ENODATA; goto error; }
+    if(strcmp(name, user.Name())) { errno = ENODATA; goto error; }
 
     // file status
     struct stat filestatus;
@@ -130,6 +145,7 @@ end:
 error:
     close(fd);
     fd = -1;
+    perror("signin");
 }
 
 void Storage::signout()
@@ -144,9 +160,30 @@ void Storage::signout()
 void Storage::cancel()
 {
     char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
-    strcat(filepath, user().name);
+    strcat(filepath, user().Name());
     signout();
     remove(filepath);
+}
+
+bool Storage::edit_name(const char *name)
+{
+    char tmp[USERNAME_SIZE];
+    strcpy(tmp, user().Name());
+    char oldname[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
+    strcat(oldname, user().Name());
+
+    if(!user().set_username(name)) return false;
+
+    char newname[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
+    strcat(newname, user().Name());
+
+    if(rename(oldname, newname) == -1)
+    {
+        user().set_username(tmp);
+        perror("editname");
+        return false;
+    }
+    return true;
 }
 
 User &Storage::user()
@@ -174,5 +211,7 @@ void Storage::insert_task(const Task &task)
     *used += sizeof(Task);
     printf("insert at %lu\n", *used);
 }
+
+
 
 #endif

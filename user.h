@@ -45,23 +45,27 @@ class User {
     // tags is bound to a user. Task should only record tag id(index).
     Tag tags[MAX_TAGS_PER_USER];
     unsigned tagcount; // count of tags
-    friend class Storage;
+
 public:
     // Remain `user` uninitialized
-    User() {}
+    User();
     /// Initialize all fields
     User(const char *username);
     /// Add a tag. If tags exists, increase its count;
     /// if tag is too long, or tag array is full, return false.
     bool add_tag(const char *tag);
+    /// Set username
+    bool set_username(const char *username);
     /// Set password
     bool set_password(const char *password);
     /// Verify password
     bool verify_password(const char *password);
     /// Whether password is unset
-    bool password_unset() { return pwdunset; }
+    bool password_unset() const { return pwdunset; }
+    /// Return username
+    const char *Name() const { return name; }
     /// Return tag name of tag with given id
-    const char *tag(int id) { return tags[id]; }
+    const char *tag(int id) const { return tags[id]; }
 
     ///To test and debug
     void get_inform()

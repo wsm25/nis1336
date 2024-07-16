@@ -39,6 +39,9 @@ public:
     // Cancel the account
     // After executing, all handler will immediately fail
     void cancel();
+    // Change username
+    // It will also change the file name
+    bool edit_name(const char *name);
     // Get User fields
     User &user();
     /// task

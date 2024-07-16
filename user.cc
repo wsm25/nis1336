@@ -5,13 +5,16 @@
 
 #include "user.h"
 
+// Remain `user` uninitialized
+User::User(): name(), pwdunset(true), tagcount(0), tags() {}
+
 /// Initialize all fields
-User::User(const char *username)
+User::User(const char *username): User()
 {
     // invalid name length
     if(strlen(username) >= USERNAME_SIZE)
     {
-        std::cerr << "Your name is too long" << std::endl;
+        std::cerr << "User: Your name is too long" << std::endl;
         return;
     }
     int i = 0;
@@ -32,12 +35,27 @@ bool User::add_tag(const char *tag)
     int taglen = strlen(tag);
     if(taglen > TAGNAME_SIZE || (tagcount + 1) > MAX_TAGS_PER_USER)
     {
-        std::cerr << "OVERFLOW" << std::endl;
+        std::cerr << "Tag: Length error" << std::endl;
         return false;
     }
 
     strcpy(tags[tagcount], tag);
     tagcount++;
+    return true;
+}
+
+/// Set username
+bool User::set_username(const char *username)
+{
+    if(strlen(username) >= USERNAME_SIZE)
+    {
+        std::cerr << "User: Your name is too long" << std::endl;
+        return false;
+    }
+    int i = 0;
+    for(;username[i] != '\0';++i)
+        name[i] = username[i];
+    name[i] = '\0';
     return true;
 }
 
@@ -47,7 +65,7 @@ bool User::set_password(const char *password)
     //invalid password length
     if(strlen(password) >= PASSWORD_SIZE)
     {
-        std::cerr << "Your password is too long" << std::endl;
+        std::cerr << "User: Your password is too long" << std::endl;
         return false;
     }
     hashpwd.initialize(password);

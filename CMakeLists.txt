@@ -8,7 +8,7 @@ project(schedule
 # dep: hash
 include_directories(${CMAKE_SOURCE_DIR}/Hash/src)
 add_executable(${PROJECT_NAME} 
-    main.cc shell.cc tasks.cc storage.cc user.cc task.cc)
+    main.cc shell.cc Command.cc tasks.cc storage.cc user.cc task.cc)
 
 # tests
 enable_testing()
