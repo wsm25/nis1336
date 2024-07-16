@@ -179,6 +179,11 @@ inline void addtask(std::istringstream &iss, bool &flag, Storage &using_file)
                 t.tags[j] = Con[j];
             t.tags[j] = '\0';
         }
+        else
+        {
+            std::cerr << "Wrong command" << std::endl;
+            return;
+        }
 
         if(it == words.end()) break;
         it++;
@@ -193,21 +198,89 @@ inline void deltask(std::istringstream &iss, bool &flag, Storage &using_file)
     int id;
     iss >> id;
     Tasks using_tasks(using_file);
-    Task *arr = using_tasks.data();
-    arr[id].status = Task::Abort;
+    using_tasks[id].status = Task::Abort;
     return;
 }
 
-//show by remind_time
+//show by specific order
 inline void showtask(std::istringstream &iss, bool &flag, Storage &using_file)
 {
+    std::string word;
+    iss >> word;
     Tasks using_tasks(using_file);
-    auto v = using_tasks.sort(&Task::remind);
-    for(auto i : v)
+
+    if(word == "-r")
     {
-        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << using_tasks[i].name << std::endl;
+        auto v = using_tasks.sort(&Task::remind);
+        for(auto i : v)
+        {
+            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+                std::cout << using_tasks[i].name << std::endl;
+        }
     }
+
+    else if(word == "-b")
+    {
+        auto v = using_tasks.sort(&Task::begin);
+        for(auto i : v)
+        {
+            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+                std::cout << using_tasks[i].name << std::endl;
+        }
+    }
+
+    else if(word == "-p")
+    {
+        auto v = using_tasks.sort(&Task::begin);
+         for(auto i : v)
+        {
+            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+                std::cout << using_tasks[i].name << std::endl;
+        }
+    }
+
+    else
+    {
+        std::cerr << "Wrong command" << std::endl;
+        return;
+    }
+
+    return;
+}
+
+inline void selecttask(std::istringstream &iss, bool &flag, Storage &using_file)
+{
+    std::string word;
+    iss >> word;
+    Tasks using_tasks(using_file);
+
+    //-hp show tasks with high priority
+    if(word == "-hp")
+    {
+        auto v = using_tasks.select(&Task::priority, Task::High);
+        for(auto i : v)
+        {
+            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+                std::cout << using_tasks[i].name << std::endl;
+        }
+    }
+    //-uf show tasks that is Unfinushed
+    else if(word == "-uf")
+    {
+        auto v = using_tasks.select(&Task::status, Task::Unfinished);
+        for(auto i : v)
+        {
+            if(!using_tasks[i].remind.isReminded)
+                std::cout << using_tasks[i].name << std::endl;
+        }
+    }
+
+    else
+    {
+        std::cerr << "Wrong command" << std::endl;
+        return;
+    }
+
     return;
 }
 
