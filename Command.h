@@ -287,9 +287,9 @@ inline void selecttask(std::istringstream &iss, bool &flag, Storage &using_file)
 //第一次打开文件的操作
 inline bool Open_By_Username(const char* user_name,const char* your_password,Storage &using_file)
 {
-    using_file.user();
     if(using_file.fail())
     {
+        using_file.signup(using_file.user());
         if(using_file.user().set_password(your_password))
         {
             std::cout << "Create your account successfully" << std::endl;
@@ -331,6 +331,7 @@ inline void *Remind(void *arg)
         {
             remind_task = (*using_tasks)[i];
             std::cout << "Time for: " << remind_task.name << std::endl;
+            remind_task.remind.isReminded == true;
         }
         sleep(5);
     }
