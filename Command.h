@@ -22,7 +22,4 @@ int deltask(std::istringstream &iss, Tasks &using_tasks);
 int edittask(std::istringstream &iss, Tasks &using_tasks);
 int showtask(std::istringstream &iss, Tasks &using_tasks);
 
-//thread-related function
-void *remind(void *arg);
-
 #endif

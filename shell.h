@@ -7,56 +7,72 @@
 #include <iostream>
 #include <sstream>
 
-namespace terminal
+class terminal
 {
-    int help();
-    int invalidCommand(int argc, char *argv []);
-    int signup(const char *user_name, const char *password);
-    int signin(const char *user_name, const char *password, Storage &using_file);
+    ///command
+public:
+    static int help();
+    static int invalidCommand(int argc, char *argv []);
+    static int signup(const char *user_name, const char *password);
+    static int signin(const char *user_name, const char *password);
+private:
+    static int editname(); static int editpwd(); static int cancel();
+    static int addtask(); static int edittask(); static int showtask(); static int deltask();
 
-    int editname(std::istringstream &iss, Storage &using_file, Tasks &using_tasks);
-    int editpwd(std::istringstream &iss, Storage &using_file, Tasks &using_tasks);
-    int cancel(std::istringstream &iss, Storage &using_file, Tasks &using_tasks);
-    int addtask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks);
-    int edittask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks);
-    int showtask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks);
-    int deltask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks);
+    ///member
+    static std::istringstream iss;
+    static Storage using_file;
+    static Tasks using_tasks;
 
-    typedef std::unordered_map<std::string, int(*)(std::istringstream &, Storage &, Tasks &)> CMDS;
-    const CMDS cmds = {{"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel}, 
-        {"addtask", addtask}, {"edittask", edittask}, {"showtask", showtask}, {"deltask", deltask}};
-}
+    typedef std::unordered_map<std::string, int(*)()> CMDS;
+    static const CMDS cmds;
 
-namespace schedule
+public:
+    static int shell(int argc, char *argv[]);
+};
+
+class schedule
 {
-    void help(std::istringstream &iss, bool &isstopped);
-    void quit(std::istringstream &iss, bool &isstopped);
-    void signin(std::istringstream &iss, bool &isstopped);
-    void signup(std::istringstream &iss, bool &isstopped);
+private:
+    ///command
+    static void help(); static void quit();
+    static void signin(); static void signup();
 
-    typedef std::unordered_map<std::string, void(*)(std::istringstream &, bool &)> CMDS;
-    const CMDS cmds = {{"help", help}, {"quit", quit}, 
-        {"signin", signin}, {"signup", signup}};
-    int shell();
-}
+    ///member
+    static std::istringstream iss;
+    static bool isstopped;
+    typedef std::unordered_map<std::string, void(*)()> CMDS;
+    static const CMDS cmds;
 
-namespace user
+public:
+    static int shell();
+
+    friend class user;
+};
+
+class user
 {
-    void help(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void signout(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void editname(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void editpwd(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void cancel(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void addtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void edittask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void showtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
-    void deltask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread);
+private:
+    ///commands
+    static void help(); static void quit(); static void signout(); 
+    static void editname(); static void editpwd(); static void cancel();
+    static void addtask(); static void edittask(); static void showtask(); static void deltask();
+    //thread-related function
+    static void *remind(void *arg);
+    
+    ///member
+    static std::istringstream iss;
+    static bool isstopped;
+    static Storage using_file;
+    static Tasks using_tasks;
+    static pthread_t remind_thread;
+    typedef std::unordered_map<std::string, void(*)()> CMDS;
+    static const CMDS cmds;
 
-    typedef std::unordered_map<std::string, void(*)(std::istringstream &, bool &, Storage &, Tasks &, pthread_t)> CMDS;
-    const CMDS cmds = {{"help", help}, 
-        {"signout", signout}, {"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel}, 
-        {"addtask", addtask}, {"edittask", edittask}, {"showtask", showtask}, {"deltask", deltask}};
-    int shell(Storage &using_file);
-}
+public:
+    static int shell();
+
+    friend class schedule;
+};
 
 #endif

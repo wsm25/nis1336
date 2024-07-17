@@ -1,9 +1,63 @@
 #include "shell.h"
 
+///static member
+//terminal
+std::istringstream terminal::iss;
+Storage terminal::using_file;
+Tasks terminal::using_tasks(terminal::using_file);
+
+const terminal::CMDS terminal::cmds = {{"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel},
+        {"addtask", addtask}, {"edittask", edittask}, {"showtask", showtask}, {"deltask", deltask}};
+
+//schedule
+std::istringstream schedule::iss;
+bool schedule::isstopped;
+
+const schedule::CMDS schedule::cmds = {{"help", help}, {"quit", quit},
+    {"signin", signin}, {"signup", signup}};
+
+//user
+std::istringstream user::iss;
+bool user::isstopped;
+Storage user::using_file;
+Tasks user::using_tasks(user::using_file);
+pthread_t user::remind_thread;
+
+const user::CMDS user::cmds = {{"help", help}, {"signout", signout},
+    {"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel},
+    {"addtask", addtask}, {"edittask", edittask}, {"showtask", showtask}, {"deltask", deltask}};
+
 ///shell
+//terminal
+int terminal::shell(int argc, char *argv [])
+{
+    //signin
+    if(signin(argv[1], argv[2]))
+        return invalidCommand(argc, argv);
+
+    std::string inputLine(argv[3]);
+    for(int i = 4; i < argc; ++i)
+    {
+        inputLine += ' ';
+        inputLine += argv[i];
+    }
+
+    iss.str(inputLine);
+    iss.clear();
+    std::string command;
+    iss >> command;
+
+    CMDS::const_iterator it = cmds.find(command);
+    if(it != cmds.end())
+        return it->second();
+    else
+        return invalidCommand(argc ,argv);
+}
+
+//schedule
 int schedule::shell()
 {
-    bool isstopped = false;
+    isstopped = false;
     while(true)
     {
         std::cout << "(schedule) ";
@@ -12,7 +66,8 @@ int schedule::shell()
         getline(std::cin, inputLine);
         if(inputLine.empty()) continue;
 
-        std::istringstream iss(inputLine);
+        iss.str(inputLine);
+        iss.clear();
         std::string command;
         iss >> command;
 
@@ -20,24 +75,21 @@ int schedule::shell()
         if(it == cmds.end())
             ::invalidCommand(iss);
         else
-            it->second(iss, isstopped);
+            it->second();
         if(isstopped) return 0;
     }
     return 1;
 }
 
-int user::shell(Storage &using_file)
+//user
+int user::shell()
 {
-    Tasks using_tasks(using_file);
-    bool isstopped = false;
-    std::pair<Tasks *, bool *> args = {&using_tasks, &isstopped};
-
-    pthread_t remind_thread;
+    isstopped = false;
 
     ///asynchronize std::cin and std::cout
     std::ios::sync_with_stdio(false);
 
-    if(errno = pthread_create(&remind_thread, NULL, remind, (void *)&args))
+    if(errno = pthread_create(&remind_thread, NULL, remind, NULL))
     {
         perror("remind thread: ");
         return 1;
@@ -50,7 +102,8 @@ int user::shell(Storage &using_file)
         getline(std::cin, inputLine);
         if(inputLine.empty()) continue;
 
-        std::istringstream iss(inputLine);
+        iss.str(inputLine);
+        iss.clear();
         std::string command;
         iss >> command;
 
@@ -58,107 +111,13 @@ int user::shell(Storage &using_file)
         if(it == cmds.end())
             ::invalidCommand(iss);
         else
-            it->second(iss, isstopped, using_file, using_tasks, remind_thread);
+            it->second();
         if(isstopped) return 0;
     }
     return 1;
 }
 
 ///shell-related command
-//schedule::shell
-void schedule::quit(std::istringstream &iss, bool &isstopped)
-{
-    if(iss.eof())
-        isstopped = true;
-    else
-        ::invalidCommand(iss);
-}
-
-void schedule::help(std::istringstream &iss, bool &isstopped)
-{
-    if(iss.eof())
-        std::cout << HELP_SCHEDULE << std::endl;
-    else
-        ::invalidCommand(iss);
-}
-
-void schedule::signin(std::istringstream &iss, bool &isstopped)
-{
-    Storage using_file;
-    if(::signin(iss, using_file) == 0)
-        user::shell(using_file);
-}
-
-void schedule::signup(std::istringstream &iss, bool &isstopped)
-{
-    Storage using_file;
-    if(::signup(iss, using_file) == 0)
-        user::shell(using_file);
-}
-
-//user::shell
-void user::help(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    if(iss.eof())
-        std::cout << HELP_USER << std::endl;
-    else
-        ::invalidCommand(iss);
-}
-
-void user::signout(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    if(iss.eof())
-    {
-        isstopped = true;
-        pthread_join(remind_thread, NULL);
-        using_file.signout();
-    }
-    else
-        invalidCommand(iss);
-}
-
-void user::editname(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    ::editname(iss, using_file);
-}
-
-void user::editpwd(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    ::editpwd(iss, using_file);
-}
-
-void user::cancel(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    if(iss.eof())
-    {
-        isstopped = true;
-        pthread_join(remind_thread, NULL);
-        using_file.cancel();
-    }
-    else
-        invalidCommand(iss);
-}
-
-void user::addtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    ::addtask(iss, using_tasks);
-}
-
-void user::edittask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    ::edittask(iss, using_tasks);
-}
-
-void user::showtask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    ::showtask(iss, using_tasks);
-}
-
-void user::deltask(std::istringstream &iss, bool &isstopped, Storage &using_file, Tasks &using_tasks, pthread_t remind_thread)
-{
-    ::deltask(iss, using_tasks);
-}
-
 //terminal
 int terminal::help()
 {
@@ -184,7 +143,7 @@ int terminal::signup(const char *user_name, const char *password)
     return tmp.fail();
 }
 
-int terminal::signin(const char *user_name, const char *password, Storage &using_file)
+int terminal::signin(const char *user_name, const char *password)
 {
     using_file.signin(user_name);
     if(using_file.fail()) return 1;
@@ -197,37 +156,116 @@ int terminal::signin(const char *user_name, const char *password, Storage &using
     return 0;
 }
 
-int terminal::editname(std::istringstream &iss, Storage &using_file, Tasks &using_tasks)
+int terminal::editname() { return ::editname(iss, using_file); }
+int terminal::editpwd() { return ::editpwd(iss, using_file); }
+int terminal::cancel() { return ::cancel(iss, using_file); }
+int terminal::addtask() { return ::addtask(iss, using_tasks); }
+int terminal::edittask() { return ::edittask(iss, using_tasks); }
+int terminal::showtask() { return ::showtask(iss, using_tasks); }
+int terminal::deltask() { return ::deltask(iss, using_tasks); }
+
+//schedule
+void schedule::quit()
 {
-    return ::editname(iss, using_file);
+    if(iss.eof())
+        isstopped = true;
+    else
+        ::invalidCommand(iss);
 }
 
-int terminal::editpwd(std::istringstream &iss, Storage &using_file, Tasks &using_tasks)
+void schedule::help()
 {
-    return ::editpwd(iss, using_file);
+    if(iss.eof())
+        std::cout << HELP_SCHEDULE << std::endl;
+    else
+        ::invalidCommand(iss);
 }
 
-int terminal::cancel(std::istringstream &iss, Storage &using_file, Tasks &using_tasks)
+void schedule::signin()
 {
-    return ::cancel(iss, using_file);
+    if(::signin(iss, user::using_file) == 0)
+        user::shell();
 }
 
-int terminal::addtask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks)
+void schedule::signup()
 {
-    return ::addtask(iss, using_tasks);
+    if(::signup(iss, user::using_file) == 0)
+        user::shell();
 }
 
-int terminal::edittask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks)
+//user
+void user::help()
 {
-    return ::edittask(iss, using_tasks);
+    if(iss.eof())
+        std::cout << HELP_USER << std::endl;
+    else
+        ::invalidCommand(iss);
 }
 
-int terminal::showtask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks)
+void user::quit()
 {
-    return ::showtask(iss, using_tasks);
+    if(iss.eof())
+    {
+        isstopped = true;
+        pthread_join(remind_thread, NULL);
+        using_file.signout();
+        schedule::isstopped = true;
+    }
+    else
+        invalidCommand(iss);
 }
 
-int terminal::deltask(std::istringstream &iss, Storage &using_file, Tasks &using_tasks)
+void user::signout()
 {
-    return ::deltask(iss, using_tasks);
+    if(iss.eof())
+    {
+        isstopped = true;
+        pthread_join(remind_thread, NULL);
+        using_file.signout();
+    }
+    else
+        invalidCommand(iss);
 }
+
+void user::cancel()
+{
+    if(iss.eof())
+    {
+        isstopped = true;
+        pthread_join(remind_thread, NULL);
+        using_file.cancel();
+    }
+    else
+        invalidCommand(iss);
+}
+
+void *user::remind(void *args)
+{
+    while(true)
+    {
+        auto v = using_tasks.select(
+            [&](const Task &task) -> bool {
+                return (task.status == Task::Unfinished && task.remind.check());
+            }
+        );
+
+        // print remind
+        for(auto i : v)
+        {
+            Task &remind_task = using_tasks[i];
+            std::cout << "\n\nTime for: " << remind_task.name << "\n\a" << std::endl;
+            remind_task.remind.isReminded = true;
+        }
+        // sleep(5); // avoid blocking
+        if(isstopped) break;
+    }
+
+    return nullptr;
+}
+
+void user::editname() { ::editname(iss, using_file); }
+void user::editpwd() { ::editpwd(iss, using_file); }
+void user::addtask() { ::addtask(iss, using_tasks); }
+void user::edittask() { ::edittask(iss, using_tasks); }
+void user::showtask() { ::showtask(iss, using_tasks); }
+void user::deltask() { ::deltask(iss, using_tasks); }

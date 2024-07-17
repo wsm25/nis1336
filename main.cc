@@ -19,27 +19,7 @@ int main(int argc, char *argv [])
     
     //other command
     if(argc >= 4)
-    {
-        //signin
-        Storage storage;
-        if(terminal::signin(argv[1], argv[2], storage)) return 1;
-        Tasks tasks(storage);
-        
-        std::string inputLine(argv[3]);
-        for(int i = 4; i < argc; ++i)
-        {
-            inputLine += ' ';
-            inputLine += argv[i];
-        }
-
-        std::istringstream iss(inputLine);
-        std::string command;
-        iss >> command;
-
-        terminal::CMDS::const_iterator it = terminal::cmds.find(command);
-        if(it != terminal::cmds.end())
-            return it->second(iss, storage, tasks);
-    }
+        return terminal::shell(argc, argv);
     //error
-    terminal::invalidCommand(argc, argv);
+    return terminal::invalidCommand(argc, argv);
 }

@@ -50,7 +50,7 @@ Commands:
    -r                       show tasks by remind time
    -d <days>                show tasks begin in next n days. default: 1(today)
    -p <pri>                 show task with given priority. default: all
-   -t <tag>                   show tasks with given tags. default: null
+   -t <tag>                 show tasks with given tags. default: null
 
  edittask <taskID> [arguments]          edit task with given ID
   Arguments:

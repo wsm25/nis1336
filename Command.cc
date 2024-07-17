@@ -517,31 +517,3 @@ int selecttask(std::istringstream &iss, bool &flag, Storage &using_file)
 
     return 0;
 }
-
-void *remind(void *args)
-{
-    // find tasks to remind
-    Tasks *using_tasks = ((std::pair<Tasks *, bool *> *)args)->first;
-    bool *isstopped = ((std::pair<Tasks *, bool *> *)args)->second;
-    
-    while(true)
-    {
-        auto v = using_tasks->select(
-            [&](const Task &task) -> bool {
-                return (task.status == Task::Unfinished && task.remind.check());
-            }
-        );
-
-        // print remind
-        for(auto i : v)
-        {
-            Task &remind_task = (*using_tasks)[i];
-            std::cout << "\n\nTime for: " << remind_task.name << std::endl;
-            remind_task.remind.isReminded = true;
-        }
-        // sleep(5); // avoid blocking
-        if(*isstopped) break;
-    }
-
-    return nullptr;
-}
