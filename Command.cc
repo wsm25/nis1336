@@ -373,13 +373,78 @@ int edittask(std::istringstream &iss, Tasks &using_tasks)
     return 0;
 }
 
+int show_high_pri (Tasks& using_tasks)
+{
+    std::cout << "Tasks with high priority: " << std::endl;
+    auto v = using_tasks.select(&Task::priority, Task::High);
+    if(v.empty())
+    {
+        std::cout << "No such task" << std ::endl;
+        return 0;
+    }
+    for(auto i : v)
+    {
+        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+            std::cout << using_tasks[i].name << std::endl;
+    }
+    return 0;
+}
+
+int show_mid_pri (Tasks& using_tasks)
+{
+    std::cout << "Tasks with middle priority: " << std::endl;
+    auto v = using_tasks.select(&Task::priority, Task::Mid);
+    if(v.empty())
+    {
+        std::cout << "No such task" << std ::endl;
+        return 0;
+    }
+    for(auto i : v)
+    {
+        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+            std::cout << using_tasks[i].name << std::endl;
+    }
+    return 0;
+}
+
+int show_low_pri (Tasks& using_tasks)
+{
+    std::cout << "Tasks with low priority: " << std::endl;
+    auto v = using_tasks.select(&Task::priority, Task::Low);
+    if(v.empty())
+    {
+        std::cout << "No such task" << std ::endl;
+        return 0;
+    }
+    for(auto i : v)
+    {
+        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+            std::cout << using_tasks[i].name << std::endl;
+    }
+    return 0;
+}
 int showtask(std::istringstream &iss, Tasks &using_tasks)
 {
     std::string word;
     iss >> word;
-    if(!iss.eof() && word != "-o")
-        return invalidCommand(iss);
-
+    if(!iss.eof())
+    {
+        if(word == "-p")
+        {
+            iss >> word;
+            if(strcasecmp(word.c_str(),"high") == 0)
+                return show_high_pri(using_tasks);
+            else if(strcasecmp(word.c_str(),"mid") == 0)
+                return show_mid_pri(using_tasks);
+            else if(strcasecmp(word.c_str(),"low") == 0)
+                return show_low_pri(using_tasks);
+            else 
+            {
+            std::cerr << "No such priority" << std::endl; 
+            return 1; 
+            }
+        }
+    }
     if(word == "-r")
     {
         auto v = using_tasks.sort(&Task::remind);
