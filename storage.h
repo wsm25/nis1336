@@ -14,6 +14,12 @@ private:
     size_t *used; // used size
     size_t mapsize; // mapping size
 
+    // encode the filename to avoid illegal access
+    void hex_encode(const char *raw, char *encoded);
+
+    // get file path
+    void get_filepath(const char *username, char *filepath);
+
     // reserve the file size to `capacity` if it is smaller; remap the memory anyway
     void reserve(size_t capacity);
 public:

@@ -23,6 +23,20 @@ struct Metadata
     size_t used;
 };
 
+void Storage::hex_encode(const char *raw, char *encoded)
+{
+    for(const char *it = raw; *it; ++it, encoded += 2)
+        sprintf(encoded, "%02hhx", *it);
+}
+
+void Storage::get_filepath(const char *username, char *filepath)
+{
+    char filename[2 * USERNAME_SIZE - 1];
+    hex_encode(username, filename);
+    strcpy(filepath, DATADIR);
+    strcat(filepath, filename);
+}
+
 void Storage::reserve(size_t capacity)
 {
     // unmap
@@ -80,8 +94,8 @@ void Storage::signup(const User &user)
     if(!fail()) signout();
 
     // create file
-    char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
-    strcat(filepath, user.Name());
+    char filepath[FILEPATH_SIZE];
+    get_filepath(user.Name(), filepath);
     fd = open(filepath, O_RDWR | O_CREAT | O_EXCL, 0666);
     if(fd == -1)
     {
@@ -115,8 +129,8 @@ void Storage::signin(const char *name)
         std::cerr << "User: Your name is too long" << std::endl;
         return;
     }
-    char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
-    strcat(filepath, name);
+    char filepath[FILEPATH_SIZE];
+    get_filepath(name, filepath);
     fd = open(filepath, O_RDWR, 0666);
     if(fd == -1)
     {
@@ -159,8 +173,8 @@ void Storage::signout()
 
 void Storage::cancel()
 {
-    char filepath[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
-    strcat(filepath, user().Name());
+    char filepath[FILEPATH_SIZE];
+    get_filepath(user().Name(), filepath);
     signout();
     remove(filepath);
 }
@@ -169,22 +183,21 @@ bool Storage::edit_name(const char *name)
 {
     char tmp[USERNAME_SIZE];
     strcpy(tmp, user().Name());
-    char oldname[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
-    strcat(oldname, user().Name());
+    char oldpath[FILEPATH_SIZE];
+    get_filepath(user().Name(), oldpath);
 
     if(!user().set_username(name)) return false;
+    char newpath[FILEPATH_SIZE];
+    get_filepath(user().Name(), newpath);
 
-    char newname[DATADIR_SIZE + USERNAME_SIZE] = DATADIR;
-    strcat(newname, user().Name());
-
-    if(access(newname, F_OK) == 0)
+    if(access(newpath, F_OK) == 0)
     {
         user().set_username(tmp);
         std::cerr << "editname: Username exists" << std::endl;
         return false;
     }
 
-    if(rename(oldname, newname) == -1)
+    if(rename(oldpath, newpath) == -1)
     {
         user().set_username(tmp);
         perror("editname");

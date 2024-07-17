@@ -12,8 +12,8 @@
 #define HASHEDPASSED_SIZE 128
 #define PASSWORD_SIZE 20
 
-#define DATADIR_SIZE 6
 #define DATADIR "data/"
+#define FILEPATH_SIZE 44 // (DATADIR_SIZE - 1) + 2 * (USERNAME_SIZE - 1) + 1
 
 constexpr char HELP_TERMINAL[] = 
 R"WSM(Schedule Command Line Tool
@@ -36,7 +36,7 @@ Commands:
  addtask [arguments]                    add task to schedule. no repaet begin time
   Arguments:
     -n <name>               set task name. no more than TASKNAME_SIZE. default: "new task"
-    -b <time>               set begin time. <time>: [YYYY/MM/DD]-HH:MM:SS. default: now
+    -b <time>               set begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. default: now
     -e <time>               set end time. default: begin time
     -r <time>               set remind time. default: begin time
     -p low|middle|high      set priority. default: none
