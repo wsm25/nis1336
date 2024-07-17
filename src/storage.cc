@@ -17,6 +17,9 @@
 #include <errno.h>
 #include <iostream>
 #include "storage.h"
+#include <pthread.h>
+
+pthread_mutex_t lock;
 
 struct Metadata
 {
@@ -39,6 +42,7 @@ void Storage::get_filepath(const char *username, char *filepath)
 
 void Storage::reserve(size_t capacity)
 {
+    pthread_mutex_lock(&lock);
     // unmap
     if(!fail()) munmap(mapping, mapsize);
 
@@ -58,6 +62,7 @@ void Storage::reserve(size_t capacity)
     used = &((Metadata *)mapping)->used;
 
 end:
+    pthread_mutex_unlock(&lock);
     return;
 error:
     mapsize = 0;

@@ -1,5 +1,8 @@
 #include "shell.h"
 
+#include <pthread.h>
+extern pthread_mutex_t lock;
+
 ///static member
 //terminal
 std::istringstream terminal::iss;
@@ -88,7 +91,7 @@ int user::shell()
 
     ///asynchronize std::cin and std::cout
     std::ios::sync_with_stdio(false);
-
+    pthread_mutex_init(&lock, 0);
     if(errno = pthread_create(&remind_thread, NULL, remind, NULL))
     {
         perror("remind thread: ");
@@ -243,6 +246,7 @@ void *user::remind(void *args)
 {
     while(true)
     {
+        pthread_mutex_lock(&lock);
         auto v = using_tasks.select(
             [&](const Task &task) -> bool {
                 return (task.status == Task::Unfinished && task.remind.check());
@@ -256,7 +260,8 @@ void *user::remind(void *args)
             std::cout << "\n\nTime for: " << remind_task.name << "\n\a" << std::endl;
             remind_task.remind.isReminded = true;
         }
-        // sleep(5); // avoid blocking
+        pthread_mutex_unlock(&lock);
+        sleep(5);
         if(isstopped) break;
     }
 
