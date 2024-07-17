@@ -41,7 +41,7 @@ Commands:
     -r <time>               set remind time. default: begin time
     -p low|middle|high      set priority. default: none
     -c <content>            set content. no more than TASKCONTENT_SIZE. default: ""
-    -t tag                  set tags. no more than MAX_TAGS_PER_TASK. default: null
+    -t tag                  set tag. no more than TAGNAME_SIZE. default: null
 
  showtask [arguments]                   show task with given filter and given order
   Arguments:
