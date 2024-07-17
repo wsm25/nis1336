@@ -423,8 +423,84 @@ int show_low_pri (Tasks& using_tasks)
     }
     return 0;
 }
+
+int show_by_tag(Tasks& using_tasks,std::string &word)
+{
+    std::cout << "Tasks with tag: " << word << std::endl;
+    auto v = using_tasks.select([&](const Task &x) -> bool
+        {
+            return x.tags == word.c_str();
+        });
+    if(v.empty())
+    {
+        std::cout << "No such task" << std ::endl;
+        return 0;
+    }
+    for(auto i : v)
+    {
+        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+            std::cout << using_tasks[i].name << std::endl;
+    }
+    return 0;
+}
+
+bool show_by_day(int days,const Task &using_task)
+{
+    time_t rawTime = time(0);
+    struct tm* now = localtime(&rawTime);
+    struct tm* task_begin = localtime(&using_task.begin);
+    // Set hours, minutes, seconds to 0 to compare only dates
+    now->tm_hour = 0;
+    now->tm_min = 0;
+    now->tm_sec = 0;
+    task_begin->tm_hour = 0;
+    task_begin->tm_min = 0;
+    task_begin->tm_sec = 0;
+    time_t now_date_only = mktime(now);
+    time_t task_date_only = mktime(task_begin);
+    return now_date_only >= task_date_only;
+}
+
+int show_day(Tasks& using_tasks,int days)
+{
+    std::cout << "Tasks in " << days << "days: " << std::endl;
+    auto v = using_tasks.select([&days](const Task &x) -> bool
+    {
+        return show_by_day(days,x);
+    });
+
+    if(v.empty())
+    {
+        std::cout << "No such task" << std ::endl;
+        return 0;
+    }
+    for(auto i : v)
+    {
+        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+            std::cout << using_tasks[i].name << std::endl;
+    }
+    return 0;
+}
 int showtask(std::istringstream &iss, Tasks &using_tasks)
 {
+    //default
+    if(iss.eof())
+    {
+        std::cout << "Show all tasks by begin time:" << std::endl;
+        auto v = using_tasks.sort(&Task::begin);
+        if(v.empty())
+        {
+            std::cout << "No tasks" << std::endl;
+            return 1;
+        }
+        for(auto i : v)
+        {
+            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+                std::cout << i << using_tasks[i].name << std::endl;
+        }
+        return 0;
+    }
+
     std::string word;
     iss >> word;
     if(!iss.eof())
@@ -432,6 +508,8 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         if(word == "-p")
         {
             iss >> word;
+            if(!iss.eof())
+                return invalidCommand(iss);
             if(strcasecmp(word.c_str(),"high") == 0)
                 return show_high_pri(using_tasks);
             else if(strcasecmp(word.c_str(),"mid") == 0)
@@ -444,36 +522,95 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
             return 1; 
             }
         }
+        else if(word == "-t")
+        {
+            iss >> word;
+            if(!iss.eof())
+                return invalidCommand(iss);
+            return show_by_tag(using_tasks,word);
+        }
+        else if(word == "-d")
+        {
+            int days = 0;
+            iss >> days;
+            if(iss.fail() || !iss.eof())
+                return invalidCommand(iss);
+            return show_day(using_tasks,days);
+        }
+        else return invalidCommand(iss);
     }
+
+    //iss.eof();
     if(word == "-r")
     {
+        std::cout << "Show all tasks by remind time:" << std::endl;
         auto v = using_tasks.sort(&Task::remind);
+        if(v.empty())
+        {
+            std::cout << "No tasks" << std::endl;
+            return 1;
+        }
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
                 std::cout << i << using_tasks[i].name << std::endl;
         }
+        return 0;
     }
 
     else if(word == "-b")
     {
+        std::cout << "Show all tasks by begin time:" << std::endl;
         auto v = using_tasks.sort(&Task::begin);
+        if(v.empty())
+        {
+            std::cout << "No tasks" << std::endl;
+            return 1;
+        }
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
                 std::cout << i << using_tasks[i].name << std::endl;
         }
+        return 0;
+    }
+
+    else if(word == "-e")
+    {
+        std::cout << "Show all tasks by end time:" << std::endl;
+        auto v = using_tasks.sort(&Task::end);
+        if(v.empty())
+        {
+            std::cout << "No tasks" << std::endl;
+            return 1;
+        }
+        for(auto i : v)
+        {
+            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
+                std::cout << i << using_tasks[i].name << std::endl;
+        }
+        return 0;
     }
 
     else if(word == "-p")
     {
+        std::cout << "Show all tasks by priority:" << std::endl;
         auto v = using_tasks.sort(&Task::begin);
+        if(v.empty())
+        {
+            std::cout << "No tasks" << std::endl;
+            return 1;
+        }
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
                 std::cout << i << using_tasks[i].name << std::endl;
         }
+        return 0;
     }
+
+    else if(word == "-d")
+        return show_day(using_tasks,0);
 
     else
         return invalidCommand(iss);
