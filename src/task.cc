@@ -1,6 +1,4 @@
 #include "task.h"
-#include<cstring>
-#include<iostream>
 
 remind_t::remind_t(time_t tm): t(tm), isReminded(false) {}
 

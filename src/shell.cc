@@ -6,14 +6,14 @@ std::istringstream terminal::iss;
 Storage terminal::using_file;
 Tasks terminal::using_tasks(terminal::using_file);
 
-const terminal::CMDS terminal::cmds = {{"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel},
+const terminal::CMDS terminal::cmds = {{"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel}, 
         {"addtask", addtask}, {"edittask", edittask}, {"showtask", showtask}, {"deltask", deltask}};
 
 //schedule
 std::istringstream schedule::iss;
 bool schedule::isstopped;
 
-const schedule::CMDS schedule::cmds = {{"help", help}, {"quit", quit},
+const schedule::CMDS schedule::cmds = {{"help", help}, {"quit", quit}, 
     {"signin", signin}, {"signup", signup}};
 
 //user
@@ -23,7 +23,7 @@ Storage user::using_file;
 Tasks user::using_tasks(user::using_file);
 pthread_t user::remind_thread;
 
-const user::CMDS user::cmds = {{"help", help}, {"signout", signout},
+const user::CMDS user::cmds = {{"help", help}, {"signout", signout}, {"quit", quit}, 
     {"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel},
     {"addtask", addtask}, {"edittask", edittask}, {"showtask", showtask}, {"deltask", deltask}};
 

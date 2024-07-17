@@ -9,12 +9,13 @@
                 "-g",
                 "${fileDirname}/*.cc",
                 "-o",
-                "${fileDirname}/schedule",
+                "${fileDirname}/../bin/schedule",
+                "-I",
+                "${fileDirname}/../inc",
                 "-Wall",
-                "-static-libgcc"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${fileDirname}/../bin"
             },
             "problemMatcher": [
                 "$gcc"

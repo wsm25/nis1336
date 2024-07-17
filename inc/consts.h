@@ -24,13 +24,10 @@ Usage:  schedule run                                      run shell with schedul
 
 Commands:
  signup                                 sign up a new account with <username> and <password>
-
  editname [<new username>]              edit username to <new username>. 
                                         default: program will guide you to enter new username
-
  editpwd [<new password>]               edit password to <new password>. 
                                         default: program will give you a hint to secretly enter new password
-
  cancel                                 cancel the account
 
  addtask [arguments]                    add task to schedule. no repaet begin time
@@ -63,7 +60,7 @@ Commands:
    -t tag                        edit tag. no more than TAGNAME_SIZE
    -s unfinished|finished|abort  edit status
 
- deltask <taskID>                delete task with given ID. alias for `edittask <taskID> -s abort`
+ deltask <taskID>                       delete task with given ID. alias for `edittask <taskID> -s abort`
  )WSM";
 
 constexpr char HELP_SCHEDULE[] = 
@@ -82,11 +79,13 @@ R"PIPI(Schedule User Interface
 
 Usage:  help                                    print this help           
         signout                                 sign out the account
+        quit                                    quit the shell
         cancel                                  cancel the account
         editname [<new username>]               edit username to <new username>. 
                                                 default: program will guide you to enter new username
         editpwd [<new password>]                edit password to <new password>. 
                                                 default: program will give you a hint to secretly enter new password
+
         addtask [arguments]                     add task to schedule. no repaet begin time
          Arguments:
           -n <name>                 set task name. no more than TASKNAME_SIZE. default: "new task"

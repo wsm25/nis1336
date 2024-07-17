@@ -5,7 +5,6 @@
 #include <vector>
 #include <ctime>
 #include <unistd.h>
-#include <utility>
 
 
 // auxiliary function
@@ -319,17 +318,6 @@ int editpwd(std::istringstream &iss, Storage &using_file)
         return invalidCommand(iss);
 }
 
-int signout(std::istringstream &iss, Storage &using_file)
-{
-    if(iss.eof())
-    {
-        using_file.signout();
-        return 0;
-    }
-    else
-        return invalidCommand(iss);
-}
-
 int cancel(std::istringstream &iss, Storage &using_file)
 {
     if(iss.eof())
@@ -614,43 +602,5 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
 
     else
         return invalidCommand(iss);
-
-
-    return 0;
-}
-
-int selecttask(std::istringstream &iss, bool &flag, Storage &using_file)
-{
-    std::string word;
-    iss >> word;
-    Tasks using_tasks(using_file);
-
-    //-hp show tasks with high priority
-    if(word == "-hp")
-    {
-        auto v = using_tasks.select(&Task::priority, Task::High);
-        for(auto i : v)
-        {
-            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << using_tasks[i].name << std::endl;
-        }
-    }
-    //-uf show tasks that is Unfinushed
-    else if(word == "-uf")
-    {
-        auto v = using_tasks.select(&Task::status, Task::Unfinished);
-        for(auto i : v)
-        {
-            if(!using_tasks[i].remind.isReminded)
-                std::cout << using_tasks[i].name << std::endl;
-        }
-    }
-
-    else
-    {
-        std::cerr << "Wrong command" << std::endl;
-        return 1;
-    }
-
     return 0;
 }

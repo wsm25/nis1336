@@ -4,12 +4,12 @@
             "name": "C/C++: g++ 生成和调试活动文件",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/build/schedule",
+            "program": "${fileDirname}/../bin/schedule",
             "args": [
                 "run"
             ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}/build",
+            "cwd": "${fileDirname}/../bin",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

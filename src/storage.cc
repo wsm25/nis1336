@@ -232,6 +232,4 @@ void Storage::insert_task(const Task &task)
     printf("insert at %lu\n", *used);
 }
 
-
-
 #endif

@@ -17,10 +17,7 @@ User::User(const char *username): User()
         std::cerr << "User: Your name is too long" << std::endl;
         return;
     }
-    int i = 0;
-    for(;username[i] != '\0';++i)
-        name[i] = username[i];
-    name[i] = '\0';
+    strcpy(name, username);
     pwdunset = true;
     tagcount = 0;
     ///default:
@@ -52,10 +49,7 @@ bool User::set_username(const char *username)
         std::cerr << "User: Your name is too long" << std::endl;
         return false;
     }
-    int i = 0;
-    for(;username[i] != '\0';++i)
-        name[i] = username[i];
-    name[i] = '\0';
+    strcpy(name, username);
     return true;
 }
 

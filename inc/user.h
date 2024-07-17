@@ -1,12 +1,11 @@
 #ifndef SCHEDULE_USER_H
 #define SCHEDULE_USER_H
-#include <cstdint>
 
+#include <cstdint>
 #include "consts.h"
 // include the header "pathToLib/sha1.h" to use sha_512
 // If you are using C++14 or C++17, don't forget the "gsl" folder!
 #include "Hash/src/sha2_512.h"
-#include <iostream>
 #include <cstring>
 #include <string>
 
@@ -66,19 +65,6 @@ public:
     const char *Name() const { return name; }
     /// Return tag name of tag with given id
     const char *tag(int id) const { return tags[id]; }
-
-    ///To test and debug
-    void get_inform()
-    {
-        std::cout << name << std::endl;
-        std::cout << "tagcount = " << tagcount << std::endl;
-        std::cout << "tags: ";
-        for(int i = 0; i < tagcount; ++i)
-            std::cout << tags[i] << ' ';
-        std::cout << std::endl;
-        std::cout << hashpwd.hashedPassword << std::endl;
-        return;
-    }
 };
 
 #endif // SCHEDULE_USER_H

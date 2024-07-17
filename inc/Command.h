@@ -13,7 +13,6 @@ int signup(std::istringstream &iss, Storage &using_file);
 int signin(std::istringstream &iss, Storage &using_file);
 int editname(std::istringstream &iss, Storage &using_file);
 int editpwd(std::istringstream &iss, Storage &using_file);
-int signout(std::istringstream &iss, Storage &using_file);
 int cancel(std::istringstream &iss, Storage &using_file);
 
 ///task-related command

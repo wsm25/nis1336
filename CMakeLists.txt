@@ -6,10 +6,8 @@ project(schedule
     HOMEPAGE_URL "https://github.com/wsm25/nis1336")
 
 # dep: hash
-include_directories(${CMAKE_SOURCE_DIR}/Hash/src)
-add_executable(${PROJECT_NAME} 
-    main.cc shell.cc Command.cc tasks.cc storage.cc user.cc task.cc)
-
-# tests
-enable_testing()
-
+include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/inc)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
+aux_source_directory(${CMAKE_SOURCE_DIR}/src SRCS)
+add_executable(${PROJECT_NAME} ${SRCS})
