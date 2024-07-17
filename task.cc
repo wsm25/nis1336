@@ -2,32 +2,17 @@
 #include<cstring>
 #include<iostream>
 
-remind_t::remind_t(): t(time(NULL)), isReminded(false) {}
-remind_t::remind_t(tm &tm): t(mktime(&tm)), isReminded(false) {}
+remind_t::remind_t(time_t tm): t(tm), isReminded(false) {}
 
 bool remind_t::check() const
 {
     return (t <= time(NULL) && !isReminded);
 }
 
-Task::Task():priority(None),status(Unfinished),begin(time(NULL)),end(time(NULL)), content()
-{
-    name = "new task";
-}
-Task::Task(std::string con):priority(None),status(Unfinished),begin(time(NULL)),end(time(NULL))
-{
-    const char* Con = con.c_str();
-    if(std::strlen(Con) >= TASKCONTENT_SIZE)
-    {
-        std::cerr << "Length is out of range" << std::endl;
-    }
-    int i = 0;
-    for (; Con[i] != '\0' && i < TASKCONTENT_SIZE; ++i)
-    {
-        content[i] = Con[i];
-    }
-    content[i] = '\0';
-}
+Task::Task(): name("new task"), 
+    priority(None), status(Unfinished), 
+    begin(time(NULL)), end(time(NULL)), remind(), 
+    content() {}
 
 bool operator==(const remind_t &t1, const remind_t &t2)
 {

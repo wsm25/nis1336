@@ -14,8 +14,7 @@ struct remind_t
 
     ///function
     //construct
-    remind_t();
-    remind_t(tm &tm);
+    remind_t(time_t tm = time(NULL));
     //check whether it is time to remind; if it is, then let isReminded = true;
     bool check() const;
     //compare
@@ -44,7 +43,6 @@ struct Task
 
     //construct
     Task();
-    Task(std::string con);
 };
 
 #endif // SCHEDULE_TASK_H

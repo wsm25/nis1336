@@ -24,8 +24,7 @@ void parseUsernameHint(std::istringstream &iss, std::string &username)
     if(iss.eof())
     {
         std::cout << "Username: ";
-        std::cin >> username;
-        std::cin.get(); // discard newline
+        getline(std::cin, username);
     }
     else
         iss >> username;
@@ -35,32 +34,32 @@ void parseUsernameHint(std::istringstream &iss, std::string &username)
 void parsePwdHint(std::istringstream &iss, std::string &password)
 {
     if(iss.eof())
-    {
         password = std::string(getpass("Password: "));
-    }
     else
         iss >> password;
 }
 
 // parse string as struct tm
-tm parseDateTime(const std::string &dateTimeStr)
+bool parseDateTime(const std::string &dateTimeStr, tm &tmTime)
 {
-    tm tmTime = {};
     std::istringstream iss(dateTimeStr);
-    char discard; // 用于丢弃分隔符
     int year, month, day;
     int hour, minute, second;
 
-    if(iss >> year >> discard >> month >> discard >> day >>
-        discard >> hour >> discard >> minute >> discard >> second)
+    if( iss >> year && iss.get() == '/' &&
+        iss >> month && iss.get() == '/' &&
+        iss >> day && iss.get() == '-' &&
+        iss >> hour && iss.get() == ':' &&
+        iss >> minute && iss.get() == ':' &&
+        iss >> second)
     {
         // 检查是否所有数据都被正确读取
-        if (!iss.eof() || !iss.good() || 
+        if (!iss.eof() || 
             year < 0 || month < 1 || month > 12 || day < 1 || day > 31 ||
             hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
             // 数据未完全读取或读取过程中出错
-            std::cerr << "Invalid time input" << std::endl;
-            return tmTime;
+            std::cerr << "Time: Invalid time input" << std::endl;
+            return false;
         }
         tmTime.tm_year = year - 1900;
         tmTime.tm_mon = month - 1;
@@ -71,10 +70,10 @@ tm parseDateTime(const std::string &dateTimeStr)
     }
     else
     {
-        std::cerr << "Failed to parse date and time." << std::endl;
+        std::cerr << "Time: Failed to parse time." << std::endl;
     }
 
-    return tmTime;
+    return true;
 }
 
 // convert string to time_t
@@ -83,7 +82,7 @@ time_t convertToTimeT(const std::string &input)
     std::tm currentTime = {};
     if(input.find('/') != std::string::npos) // 包含日期
     {
-        currentTime = parseDateTime(input);
+        parseDateTime(input, currentTime);
     }
     else // 仅时间，使用当前日期
     {
@@ -94,9 +93,11 @@ time_t convertToTimeT(const std::string &input)
         char discard; // 用于丢弃分隔符
 
         std::istringstream iss(input);
-        if(iss >> hour >> discard >> minute >> discard >> second)
+        if( iss >> hour && iss.get() == ':' &&
+            iss >> minute && iss.get() == ':' &&
+            iss >> second)
         {
-            if (!iss.eof() || !iss.good() || 
+            if (!iss.eof() || 
                 hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59)
             {
                 // 数据未完全读取或读取过程中出错
@@ -113,6 +114,143 @@ time_t convertToTimeT(const std::string &input)
         }
     }
     return mktime(&currentTime);
+}
+
+//parse Task
+bool parseTask(std::istringstream &iss, Task &t)
+{
+    if(iss.eof()) return true;
+    std::string word;
+    // 用来存储分割后的单词
+    std::vector<std::string> words;
+
+    //防止先输入-e或者-r,再输入-b将其覆盖
+    bool end_set = false;
+    bool remind_set = false;
+    // 循环读取每个单词
+    while(iss >> word)
+        words.push_back(word);
+
+    int i = 0;
+    auto it = words.begin() + i;
+    if(it == words.end())
+    {
+        invalidCommand(iss);
+        return false;
+    }
+    while(it != words.end())
+    {
+        //检查指令后是否有参数
+        if(it == words.end())
+        {
+            std::cerr << *it << ": Parameter missing" << std::endl;
+            invalidCommand(iss);
+            return false;
+        }
+        //此时it为输入参数
+        i++;
+        const char *Con = words[i].c_str();
+        if(*it == "-n")
+        {
+            it++;
+            t.name = Con;
+        }
+
+        else if(*it == "-c")
+        {
+            it++;
+            if(std::strlen(Con) >= TASKCONTENT_SIZE)
+            {
+                std::cerr << "Length is out of range" << std::endl;
+                return false;
+            }
+            int i = 0;
+            for(; Con[i] != '\0'; ++i)
+                t.content[i] = Con[i];
+            t.content[i] = '\0';
+        }
+
+        else if(*it == "-b")
+        {
+            it++;
+            std::string str(Con);
+            t.begin = convertToTimeT(str);
+            if(!end_set)
+                t.end = t.begin;
+            if(!remind_set)
+                t.remind.t = t.begin;
+        }
+
+        else if(*it == "-e")
+        {
+            it++;
+            std::string str(Con);
+            t.end = convertToTimeT(str);
+            end_set = true;
+        }
+
+        else if(*it == "-r")
+        {
+            it++;
+            std::string str(Con);
+            t.remind.t = convertToTimeT(str);
+            remind_set = true;
+        }
+
+        else if(*it == "-p")
+        {
+            it++;
+            if(!strcmp(Con, "Low"))
+                t.priority = Task::Low;
+            else if(!strcmp(Con, "Mid"))
+                t.priority = Task::Mid;
+            else if(!strcmp(Con, "High"))
+                t.priority = Task::High;
+        }
+
+        else if(*it == "-t")
+        {
+            it++;
+            if(strlen(Con) >= TAGNAME_SIZE)
+            {
+                std::cerr << "Tag is too long" << std::endl;
+                return false;
+            }
+            int j = 0;
+            for(; Con[j] != '\0'; ++j)
+                t.tags[j] = Con[j];
+            t.tags[j] = '\0';
+        }
+
+        else
+        {
+            invalidCommand(iss);
+            return false;
+        }
+
+        if(it == words.end()) break;
+        it++;
+        i++;
+    }//while结束
+    return true;
+}
+
+//parse taskID
+bool parseTaskID(std::istringstream &iss, Tasks &using_tasks, uint64_t &id)
+{
+    iss >> id;
+    if(iss.fail())
+    {
+        invalidCommand(iss);
+        return false;
+    }
+    else if(id >= using_tasks.size() || using_tasks[id].status == Task::Abort)
+    {
+        std::cerr << "Tasks: No such task" << std::endl;
+        return false;
+    }
+    else
+        return true;
 }
 
 ///user-related command
@@ -206,131 +344,32 @@ int cancel(std::istringstream &iss, Storage &using_file)
 ///task-related command
 int addtask(std::istringstream &iss, Tasks &using_tasks)
 {
-    std::string word;
-    // 用来存储分割后的单词
-    std::vector<std::string> words;
     Task t;
-
-    //防止先输入-e或者-r,再输入-b将其覆盖
-    bool end_set = false;
-    bool remind_set = false;
-    // 循环读取每个单词
-    while(iss >> word)
-        words.push_back(word);
-
-    int i = 0;
-    auto it = words.begin() + i;
-    if(it == words.end())
-    {
-        ::invalidCommand(iss);
-        return 1;
-    }
-    while(it != words.end())
-    {
-        //检查指令后是否有参数
-        if(it == words.end())
-        {
-            std::cerr << "Parameter missing" << std::endl;
-            return invalidCommand(iss);
-        }
-        //此时it为输入参数
-        i++;
-        const char *Con = words[i].c_str();
-        if(*it == "-n")
-        {
-            it++;
-            t.name = Con;
-        }
-
-        else if(*it == "-c")
-        {
-            it++;
-            if(std::strlen(Con) >= TASKCONTENT_SIZE)
-            {
-                std::cerr << "Length is out of range" << std::endl;
-                return 1;
-            }
-            int i = 0;
-            for(; Con[i] != '\0'; ++i)
-                t.content[i] = Con[i];
-            t.content[i] = '\0';
-        }
-
-        else if(*it == "-b")
-        {
-            it++;
-            std::string str(Con);
-            t.begin = convertToTimeT(str);
-            if(!end_set)
-                t.end = t.begin;
-            if(!remind_set)
-                t.remind.t = t.begin;
-        }
-
-        else if(*it == "-e")
-        {
-            it++;
-            std::string str(Con);
-            t.end = convertToTimeT(str);
-            end_set = true;
-        }
-
-        else if(*it == "-r")
-        {
-            it++;
-            std::string str(Con);
-            t.remind.t = convertToTimeT(str);
-            remind_set = true;
-        }
-
-        else if(*it == "-p")
-        {
-            it++;
-            if(!strcmp(Con, "Low"))
-                t.priority = Task::Low;
-            else if(!strcmp(Con, "Mid"))
-                t.priority = Task::Mid;
-            else if(!strcmp(Con, "High"))
-                t.priority = Task::High;
-        }
-
-        else if(*it == "-t")
-        {
-            it++;
-            if(strlen(Con) >= TAGNAME_SIZE)
-            {
-                std::cerr << "Tag is too long" << std::endl;
-                return 1;
-            }
-            int j = 0;
-            for(; Con[j] != '\0'; ++j)
-                t.tags[j] = Con[j];
-            t.tags[j] = '\0';
-        }
-
-        else
-        {
-            return invalidCommand(iss);
-        }
-
-        if(it == words.end()) break;
-        it++;
-        i++;
-    }//while结束
-    using_tasks.insert(t);
-    return 0;
+    if(!parseTask(iss, t)) return 1;
+    if(iss.eof())
+        return using_tasks.insert(t);
+    else
+        return invalidCommand(iss);
 }
 
 int deltask(std::istringstream &iss, Tasks &using_tasks)
 {
-    int id;
-    iss >> id;
-    using_tasks[id].status = Task::Abort;
-    return 0;
+    uint64_t id;
+    if(!parseTaskID(iss, using_tasks, id)) return 1;
+    if(iss.eof())
+    {
+        using_tasks[id].status = Task::Abort;
+        return 0;
+    }
+    else
+        return invalidCommand(iss);
 }
 
 int edittask(std::istringstream &iss, Tasks &using_tasks)
 {
+    uint64_t id;
+    if(!parseTaskID(iss, using_tasks, id)) return 1;
+    if(!parseTask(iss, using_tasks[id])) return 1;
     return 0;
 }
 
@@ -347,7 +386,7 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << using_tasks[i].name << std::endl;
+                std::cout << i << using_tasks[i].name << std::endl;
         }
     }
 
@@ -357,7 +396,7 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << using_tasks[i].name << std::endl;
+                std::cout << i << using_tasks[i].name << std::endl;
         }
     }
 
@@ -367,7 +406,7 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << using_tasks[i].name << std::endl;
+                std::cout << i << using_tasks[i].name << std::endl;
         }
     }
 
