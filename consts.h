@@ -45,12 +45,12 @@ Commands:
 
  showtask [arguments]                   show task with given filter and given order
   Arguments:
-   -b HH:MM:SS              earliest task time. default: 00:00:00
-   -e HH:MM:SS              latest task time. default: 23:59:59
-   -d <days>                show tasks in next n days. default: 1(today)
-   -p pri                   show task with given priority. default: all
-   -t tag                   show tasks with given tags. default: null
-   -o <order>               show tasks with given order. <order>:
+   -b                       show tasks by begin time
+   -e                       show tasks by end time
+   -r                       show tasks by remind time
+   -d <days>                show tasks begin in next n days. default: 1(today)
+   -p <pri>                 show task with given priority. default: all
+   -t <tag>                   show tasks with given tags. default: null
 
  edittask <taskID> [arguments]          edit task with given ID
   Arguments:
@@ -95,16 +95,16 @@ Usage:  help                                    print this help
           -r <time>                 set remind time. default: begin time
           -p low|middle|high        set priority. default: none
           -c <content>              set content. no more than TASKCONTENT_SIZE. default: ""
-          -t tag                    set tags. no more than MAX_TAGS_PER_TASK. default: null
+          -t tag                    set tag. no more than TAGNAME_SIZE. default: null
 
         showtask [arguments]                    show task with given filter and given order
          Arguments:
-          -b HH:MM:SS               earliest task time. default: 00:00:00
-          -e HH:MM:SS               latest task time. default: 23:59:59
-          -d <days>                 show tasks in next n days. default: 1(today)
-          -p pri                    show task with given priority. default: all
-          -t tag                    show tasks with given tag. default: null
-          -o <order>                show tasks with given order. <order>:
+          -b                       show tasks by begin time
+          -e                       show tasks by end time
+          -r                       show tasks by remind time
+          -d <days>                show tasks begin in next n days. default: 1(today)
+          -p <pri>                 show task with given priority. default: all
+          -t <tag>                   show tasks with given tags. default: null
 
         edittask <taskID> [arguments]           edit task with given ID
          Arguments:
