@@ -42,7 +42,6 @@ Commands:
     -p low|middle|high      set priority. default: none
     -c <content>            set content. no more than TASKCONTENT_SIZE. default: ""
     -t tag                  set tags. no more than MAX_TAGS_PER_TASK. default: null
-    -f                      overwrite if task exists
 
  showtask [arguments]                   show task with given filter and given order
   Arguments:
@@ -61,7 +60,7 @@ Commands:
    -r <time>                     edit remind time
    -p low|middle|high            edit priority
    -c <content>                  edit content. no more than TASKCONTENT_SIZE
-   -t tag1,tag2,..               edit tags. no more than MAX_TAGS_PER_TASK
+   -t tag                        edit tag. no more than TAGNAME_SIZE
    -s unfinished|finished|abort  edit status
 
  deltask <taskID>                delete task with given ID. alias for `edittask <taskID> -s abort`
@@ -97,7 +96,6 @@ Usage:  help                                    print this help
           -p low|middle|high        set priority. default: none
           -c <content>              set content. no more than TASKCONTENT_SIZE. default: ""
           -t tag                    set tags. no more than MAX_TAGS_PER_TASK. default: null
-          -f                        overwrite if task exists
 
         showtask [arguments]                    show task with given filter and given order
          Arguments:
@@ -105,7 +103,7 @@ Usage:  help                                    print this help
           -e HH:MM:SS               latest task time. default: 23:59:59
           -d <days>                 show tasks in next n days. default: 1(today)
           -p pri                    show task with given priority. default: all
-          -t tag                    show tasks with given tags. default: null
+          -t tag                    show tasks with given tag. default: null
           -o <order>                show tasks with given order. <order>:
 
         edittask <taskID> [arguments]           edit task with given ID
@@ -116,7 +114,7 @@ Usage:  help                                    print this help
           -r <time>                     edit remind time
           -p low|middle|high            edit priority
           -c <content>                  edit content. no more than TASKCONTENT_SIZE
-          -t tag1,tag2,..               edit tags. no more than MAX_TAGS_PER_TASK
+          -t tag                        edit tag. no more than TAGNAME_SIZE
           -s unfinished|finished|abort  edit status
 
         deltask <taskID>            delete task with given ID. alias for `edittask <taskID> -s abort`

@@ -54,6 +54,14 @@ tm parseDateTime(const std::string &dateTimeStr)
     if(iss >> year >> discard >> month >> discard >> day >>
         discard >> hour >> discard >> minute >> discard >> second)
     {
+        // 检查是否所有数据都被正确读取
+        if (!iss.eof() || !iss.good() || 
+            year < 0 || month < 1 || month > 12 || day < 1 || day > 31 ||
+            hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
+            // 数据未完全读取或读取过程中出错
+            std::cerr << "Invalid time input" << std::endl;
+            return tmTime;
+        }
         tmTime.tm_year = year - 1900;
         tmTime.tm_mon = month - 1;
         tmTime.tm_mday = day;
@@ -88,6 +96,13 @@ time_t convertToTimeT(const std::string &input)
         std::istringstream iss(input);
         if(iss >> hour >> discard >> minute >> discard >> second)
         {
+            if (!iss.eof() || !iss.good() || 
+                hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59)
+            {
+                // 数据未完全读取或读取过程中出错
+                std::cerr << "Invalid time input" << std::endl;
+                return mktime(&currentTime);
+            }
             currentTime.tm_hour = hour;
             currentTime.tm_min = minute;
             currentTime.tm_sec = second;
@@ -191,11 +206,11 @@ int cancel(std::istringstream &iss, Storage &using_file)
 ///task-related command
 int addtask(std::istringstream &iss, Tasks &using_tasks)
 {
-
     std::string word;
     // 用来存储分割后的单词
     std::vector<std::string> words;
     Task t;
+
     //防止先输入-e或者-r,再输入-b将其覆盖
     bool end_set = false;
     bool remind_set = false;
@@ -207,7 +222,7 @@ int addtask(std::istringstream &iss, Tasks &using_tasks)
     auto it = words.begin() + i;
     if(it == words.end())
     {
-        std::cerr << "Wrong Input" << std::endl;
+        ::invalidCommand(iss);
         return 1;
     }
     while(it != words.end())
@@ -215,8 +230,8 @@ int addtask(std::istringstream &iss, Tasks &using_tasks)
         //检查指令后是否有参数
         if(it == words.end())
         {
-            std::cerr << "Wrong Input" << std::endl;
-            return 1;
+            std::cerr << "Parameter missing" << std::endl;
+            return invalidCommand(iss);
         }
         //此时it为输入参数
         i++;
@@ -293,6 +308,11 @@ int addtask(std::istringstream &iss, Tasks &using_tasks)
             t.tags[j] = '\0';
         }
 
+        else
+        {
+            return invalidCommand(iss);
+        }
+
         if(it == words.end()) break;
         it++;
         i++;
@@ -318,6 +338,8 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
 {
     std::string word;
     iss >> word;
+    if(!iss.eof() && word != "-o")
+        return invalidCommand(iss);
 
     if(word == "-r")
     {
@@ -350,10 +372,8 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
     }
 
     else
-    {
-        std::cerr << "Wrong command" << std::endl;
-        return 1;
-    }
+        return invalidCommand(iss);
+
 
     return 0;
 }
