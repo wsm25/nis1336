@@ -305,6 +305,11 @@ bool parseTask(std::istringstream &iss, Task &t)
         it++;
         i++;
     }//while结束
+    if(t.begin > t.end)
+    {
+        std::cerr << RED << "Task: begin time is later than end time" << RESET << std::endl;
+            return false;
+    }
     return true;
 }
 
