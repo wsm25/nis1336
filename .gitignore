@@ -1,7 +1,4 @@
 .vs/
-*.exe
-*.out
-*.o
 data/
 build/
-
+.vscode/
