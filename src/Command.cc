@@ -6,6 +6,7 @@
 #include <vector>
 #include <ctime>
 #include <unistd.h>
+#include <iomanip>
 
 
 // auxiliary function
@@ -40,7 +41,7 @@ void parsePwdHint(std::istringstream &iss, std::string &password)
 }
 
 // parse string as struct tm
-bool parseDateTime(const std::string &dateTimeStr, tm &tmTime)
+bool parseDateTime(const std::string &dateTimeStr, tm &tmTime,bool &time_correct)
 {
     std::istringstream iss(dateTimeStr);
     int year, month, day;
@@ -67,6 +68,7 @@ bool parseDateTime(const std::string &dateTimeStr, tm &tmTime)
         tmTime.tm_hour = hour;
         tmTime.tm_min = minute;
         tmTime.tm_sec = second;
+        time_correct = true;
     }
     else
     {
@@ -77,12 +79,12 @@ bool parseDateTime(const std::string &dateTimeStr, tm &tmTime)
 }
 
 // convert string to time_t
-time_t convertToTimeT(const std::string &input)
+time_t convertToTimeT(const std::string &input,bool &time_correct)
 {
     std::tm currentTime = {};
     if(input.find('/') != std::string::npos) // 包含日期
     {
-        parseDateTime(input, currentTime);
+        parseDateTime(input, currentTime,time_correct);
     }
     else // 仅时间，使用当前日期
     {
@@ -90,7 +92,6 @@ time_t convertToTimeT(const std::string &input)
         time_t rawTime = time(0);
         currentTime = *localtime(&rawTime); // 获取当前时间的tm结构
         int hour, minute, second;
-        char discard; // 用于丢弃分隔符
 
         std::istringstream iss(input);
         if( iss >> hour && iss.get() == ':' &&
@@ -107,6 +108,7 @@ time_t convertToTimeT(const std::string &input)
             currentTime.tm_hour = hour;
             currentTime.tm_min = minute;
             currentTime.tm_sec = second;
+            time_correct = true;
         }
         else
         {
@@ -176,8 +178,10 @@ bool parseTask(std::istringstream &iss, Task &t)
         else if(*it == "-b")
         {
             it++;
+            bool time_correct = false;
             std::string str(Con);
-            t.begin = convertToTimeT(str);
+            t.begin = convertToTimeT(str,time_correct);
+            if(!time_correct) return false;
             if(!end_set)
                 t.end = t.begin;
             if(!remind_set)
@@ -187,28 +191,33 @@ bool parseTask(std::istringstream &iss, Task &t)
         else if(*it == "-e")
         {
             it++;
+            bool time_correct = false;
             std::string str(Con);
-            t.end = convertToTimeT(str);
+            t.end = convertToTimeT(str,time_correct);
+            if(!time_correct) return false;
             end_set = true;
         }
 
         else if(*it == "-r")
         {
             it++;
+            bool time_correct = false;
             std::string str(Con);
-            t.remind.t = convertToTimeT(str);
+            t.remind.t = convertToTimeT(str,time_correct);
+            if(!time_correct) return false;
             remind_set = true;
         }
 
         else if(*it == "-p")
         {
             it++;
-            if(!strcmp(Con, "Low"))
+            if(!strcasecmp(Con, "Low"))
                 t.priority = Task::Low;
-            else if(!strcmp(Con, "Mid"))
+            else if(!strcasecmp(Con, "Mid"))
                 t.priority = Task::Mid;
-            else if(!strcmp(Con, "High"))
+            else if(!strcasecmp(Con, "High"))
                 t.priority = Task::High;
+            else return false;
         }
 
         else if(*it == "-t")
@@ -220,9 +229,10 @@ bool parseTask(std::istringstream &iss, Task &t)
                 return false;
             }
             int j = 0;
-            for(; Con[j] != '\0'; ++j)
-                t.tags[j] = Con[j];
-            t.tags[j] = '\0';
+            // for(; Con[j] != '\0'; ++j)
+            //     t.tags[j] = Con[j];
+            // t.tags[j] = '\0';
+            t.tags = Con;
         }
 
         else
@@ -377,7 +387,7 @@ int show_high_pri (Tasks& using_tasks)
     for(auto i : v)
     {
         if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << using_tasks[i].name << std::endl;
+            std::cout << "ID: " << std::setw(5) << std::left << i << std::setw(20) << using_tasks[i].name << std::endl;
     }
     return 0;
 }
@@ -394,7 +404,7 @@ int show_mid_pri (Tasks& using_tasks)
     for(auto i : v)
     {
         if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << using_tasks[i].name << std::endl;
+            std::cout << "ID: " << std::setw(5) << std::left << i << std::setw(20) << using_tasks[i].name << std::endl;
     }
     return 0;
 }
@@ -411,7 +421,7 @@ int show_low_pri (Tasks& using_tasks)
     for(auto i : v)
     {
         if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << using_tasks[i].name << std::endl;
+            std::cout << "ID: " << std::setw(5) << std::left << i << std::setw(20) << using_tasks[i].name << std::endl;
     }
     return 0;
 }
