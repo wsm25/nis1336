@@ -162,11 +162,15 @@ bool parseTask(std::istringstream &iss, Task &t)
             return false;
         }
         //此时it为输入参数
-        i++;
-        const char *Con = words[i].c_str();
+
         if(*it == "-n")
         {
-            it++;
+            if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             if(std::strlen(Con) >= TASKNAME_SIZE)
             {
                 std::cerr << "Task: Name is too long" << std::endl;
@@ -177,7 +181,12 @@ bool parseTask(std::istringstream &iss, Task &t)
 
         else if(*it == "-c")
         {
-            it++;
+             if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             if(std::strlen(Con) >= TASKCONTENT_SIZE)
             {
                 std::cerr << "Task: Content is too long" << std::endl;
@@ -188,7 +197,12 @@ bool parseTask(std::istringstream &iss, Task &t)
 
         else if(*it == "-b")
         {
-            it++;
+             if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             bool time_correct = false;
             std::string str(Con);
             t.begin = convertToTimeT(str,time_correct);
@@ -201,7 +215,12 @@ bool parseTask(std::istringstream &iss, Task &t)
 
         else if(*it == "-e")
         {
-            it++;
+             if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             bool time_correct = false;
             std::string str(Con);
             t.end = convertToTimeT(str,time_correct);
@@ -211,7 +230,12 @@ bool parseTask(std::istringstream &iss, Task &t)
 
         else if(*it == "-r")
         {
-            it++;
+             if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             bool time_correct = false;
             std::string str(Con);
             t.remind.t = convertToTimeT(str,time_correct);
@@ -221,7 +245,12 @@ bool parseTask(std::istringstream &iss, Task &t)
 
         else if(*it == "-p")
         {
-            it++;
+             if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             if(!strcasecmp(Con, "Low"))
                 t.priority = Task::Low;
             else if(!strcasecmp(Con, "Mid"))
@@ -233,7 +262,12 @@ bool parseTask(std::istringstream &iss, Task &t)
 
         else if(*it == "-t")
         {
-            it++;
+             if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             if(strlen(Con) >= TAGNAME_SIZE)
             {
                 std::cerr << "Tag is too long" << std::endl;
@@ -247,7 +281,12 @@ bool parseTask(std::istringstream &iss, Task &t)
 
         else if(*it == "-s")
         {
-            it++;
+             if(++it == words.end()) 
+            {
+                invalidCommand(iss);
+                return false;
+            }
+            const char *Con = (*it).c_str();
             if(!strcasecmp(Con, "unfin"))
                 t.status = Task::Unfinished;
             else if(!strcasecmp(Con, "fin"))
