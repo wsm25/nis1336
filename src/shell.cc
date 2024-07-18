@@ -60,6 +60,7 @@ int terminal::shell(int argc, char *argv [])
 //schedule
 int schedule::shell()
 {
+    iss.setstate(iss.eofbit); help();
     isstopped = false;
     while(true)
     {
@@ -69,8 +70,8 @@ int schedule::shell()
         getline(std::cin, inputLine);
         if(inputLine.empty()) continue;
 
-        iss.str(inputLine);
         iss.clear();
+        iss.str(inputLine);
         std::string command;
         iss >> command;
 
@@ -91,13 +92,17 @@ int user::shell()
 
     ///asynchronize std::cin and std::cout
     std::ios::sync_with_stdio(false);
+
     pthread_mutex_init(&lock, 0);
+
     if(errno = pthread_create(&remind_thread, NULL, remind, NULL))
     {
         perror("remind thread: ");
         return 1;
     }
 
+    std::cout << "Welcome: " << using_file.user().Name() << std::endl;
+    iss.setstate(iss.eofbit); showtask();
     while(true)
     {
         std::cout << "(" << using_file.user().Name() << ") ";
@@ -257,12 +262,12 @@ void *user::remind(void *args)
         for(auto i : v)
         {
             Task &remind_task = using_tasks[i];
-            std::cout << "\n\nTime for: " << remind_task.name << "\n\a" << std::endl;
+            std::cout << "\n\nTime for: " << i << " " << remind_task.name << "\n\a" << std::endl;
             remind_task.remind.isReminded = true;
         }
         pthread_mutex_unlock(&lock);
-        sleep(5);
         if(isstopped) break;
+        sleep(1);
     }
 
     return nullptr;

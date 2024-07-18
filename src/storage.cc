@@ -60,7 +60,7 @@ void Storage::reserve(size_t capacity)
 
     // initialize
     used = &((Metadata *)mapping)->used;
-
+    
 end:
     pthread_mutex_unlock(&lock);
     return;
@@ -69,6 +69,7 @@ error:
     close(fd);
     fd = -1;
     perror("reserve");
+    goto end;
 }
 
 Storage::Storage(): fd(-1), mapping(MAP_FAILED), mapsize(0) {}
@@ -116,6 +117,7 @@ void Storage::signup(const User &user)
     reserve(meta.used + 2 * sizeof(Task)); // reserve 2 task space
 
 end:
+    std::cout << "New user: " << user.Name() << std::endl;
     return;
 error:
     close(fd);

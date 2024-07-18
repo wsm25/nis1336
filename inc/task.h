@@ -43,6 +43,7 @@ struct Task
 
     //construct
     Task();
+    void showtask();
 };
 
 #endif // SCHEDULE_TASK_H
