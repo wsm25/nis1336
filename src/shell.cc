@@ -68,7 +68,7 @@ int schedule::shell()
 
         std::string inputLine;
         getline(std::cin, inputLine);
-        std::cin.clear();
+        if(std::cin.fail()) return 0;
         if(inputLine.empty()) continue;
 
         iss.clear();
@@ -109,6 +109,7 @@ int user::shell()
         std::cout << "(" << using_file.user().Name() << ") ";
         std::string inputLine;
         getline(std::cin, inputLine);
+        if(std::cin.fail()) return 0;
         if(inputLine.empty()) continue;
 
         iss.str(inputLine);
