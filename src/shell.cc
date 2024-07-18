@@ -68,6 +68,7 @@ int schedule::shell()
 
         std::string inputLine;
         getline(std::cin, inputLine);
+        std::cin.clear();
         if(inputLine.empty()) continue;
 
         iss.clear();
