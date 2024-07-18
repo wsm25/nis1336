@@ -106,7 +106,7 @@ void Storage::signup(const User &user)
     fd = open(filepath, O_RDWR | O_CREAT | O_EXCL, 0666);
     if(fd == -1)
     {
-        if(errno == EEXIST) std::cerr << "signup: Username exists" << std::endl;
+        if(errno == EEXIST) std::cerr << RED << "signup: Username exists" << RESET << std::endl;
         else perror("signup");
         return;
     }
@@ -134,7 +134,7 @@ void Storage::signin(const char *name)
     // open file
     if(strlen(name) >= USERNAME_SIZE) // invalid name length
     {
-        std::cerr << "User: Your name is too long" << std::endl;
+        std::cerr << RED << "User: Your name is too long" << RESET << std::endl;
         return;
     }
     char filepath[FILEPATH_SIZE];
@@ -142,7 +142,7 @@ void Storage::signin(const char *name)
     fd = open(filepath, O_RDWR, 0666);
     if(fd == -1)
     {
-        if(errno == ENOENT) std::cerr << "signin: No such user" << std::endl;
+        if(errno == ENOENT) std::cerr << RED << "signin: No such user" << RESET << std::endl;
         else perror("signin");
         return;
     }
@@ -201,7 +201,7 @@ bool Storage::edit_name(const char *name)
     if(access(newpath, F_OK) == 0)
     {
         user().set_username(tmp);
-        std::cerr << "editname: Username exists" << std::endl;
+        std::cerr << RED << "editname: Username exists" << RESET << std::endl;
         return false;
     }
 

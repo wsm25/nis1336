@@ -15,6 +15,9 @@
 #define DATADIR "data/"
 #define FILEPATH_SIZE 44 // (DATADIR_SIZE - 1) + 2 * (USERNAME_SIZE - 1) + 1
 
+#define RESET "\033[0m"
+#define RED "\033[31m"
+
 constexpr char HELP_TERMINAL[] = 
 R"WSM(Schedule Command Line Tool
 

@@ -135,10 +135,10 @@ int terminal::help()
 
 int terminal::invalidCommand(int argc, char *argv [])
 {
-    std::cerr << "Invalid command:";
+    std::cerr << RED << "Invalid command:";
     for(int i = 1; i < argc; ++i)
         std::cerr << " " << argv[i];
-    std::cerr << "\ntry help" << std::endl;
+    std::cerr << "\ntry help" << RESET << std::endl;
     return 1;
 }
 
@@ -158,7 +158,7 @@ int terminal::signin(const char *user_name, const char *password)
     if(!using_file.user().verify_password(password))
     {
         using_file.signout();
-        std::cerr << "signin: Wrong password" << std::endl;
+        std::cerr << RED << "signin: Wrong password" << RESET << std::endl;
         return 1;
     }
     return 0;

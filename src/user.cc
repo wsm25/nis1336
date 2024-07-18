@@ -14,7 +14,7 @@ User::User(const char *username): User()
     // invalid name length
     if(strlen(username) >= USERNAME_SIZE)
     {
-        std::cerr << "User: Your name is too long" << std::endl;
+        std::cerr << RED << "User: Your name is too long" << RESET << std::endl;
         return;
     }
     strcpy(name, username);
@@ -32,7 +32,7 @@ bool User::add_tag(const char *tag)
     int taglen = strlen(tag);
     if(taglen > TAGNAME_SIZE || (tagcount + 1) > MAX_TAGS_PER_USER)
     {
-        std::cerr << "Tag: Length error" << std::endl;
+        std::cerr << RED << "Tag: Length error" << RESET << std::endl;
         return false;
     }
 
@@ -46,7 +46,7 @@ bool User::set_username(const char *username)
 {
     if(strlen(username) >= USERNAME_SIZE)
     {
-        std::cerr << "User: Your name is too long" << std::endl;
+        std::cerr << RED << "User: Your name is too long" << RESET << std::endl;
         return false;
     }
     strcpy(name, username);
@@ -59,7 +59,7 @@ bool User::set_password(const char *password)
     //invalid password length
     if(strlen(password) >= PASSWORD_SIZE)
     {
-        std::cerr << "User: Your password is too long" << std::endl;
+        std::cerr << RED << "User: Your password is too long" << RESET << std::endl;
         return false;
     }
     hashpwd.initialize(password);

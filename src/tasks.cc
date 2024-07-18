@@ -15,7 +15,7 @@ bool Tasks::insert(const Task &t)
     }
     else
     {
-        std::cerr << "addtask: Task repeats" << std::endl;
+        std::cerr << RED << "addtask: Task repeats" << RESET << std::endl;
         return false;
     }
 }

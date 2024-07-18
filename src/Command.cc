@@ -7,7 +7,6 @@
 #include <ctime>
 #include <unistd.h>
 #include <iomanip>
-#include <chrono>
 
 
 // auxiliary function
@@ -15,7 +14,7 @@
 // error message
 int invalidCommand(std::istringstream &iss)
 {
-    std::cerr << "Invalid command: " << iss.str() << "\ntry help" << std::endl;
+    std::cerr << RED << "Invalid command: " << iss.str() << "\ntry help" << RESET << std::endl;
     return 1;
 }
 
@@ -38,7 +37,7 @@ bool parseUsernameHint(std::istringstream &iss, std::string &username)
     }
 
 error:
-    std::cerr << "User: Invalid name" << std::endl;
+    std::cerr << RED << "User: Invalid name" << RESET << std::endl;
     return false;
 }
 
@@ -70,7 +69,7 @@ bool parseDateTime(const std::string &dateTimeStr, tm &tmTime,bool &time_correct
             year < 0 || month < 1 || month > 12 || day < 1 || day > 31 ||
             hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
             // 数据未完全读取或读取过程中出错
-            std::cerr << "Time: Invalid time input" << std::endl;
+            std::cerr << RED << "Time: Invalid time input" << RESET << std::endl;
             return false;
         }
         tmTime.tm_year = year - 1900;
@@ -83,7 +82,7 @@ bool parseDateTime(const std::string &dateTimeStr, tm &tmTime,bool &time_correct
     }
     else
     {
-        std::cerr << "Time: Failed to parse time." << std::endl;
+        std::cerr << RED << "Time: Failed to parse time." << RESET << std::endl;
     }
 
     return true;
@@ -113,7 +112,7 @@ time_t convertToTimeT(const std::string &input,bool &time_correct)
                 hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59)
             {
                 // 数据未完全读取或读取过程中出错
-                std::cerr << "Invalid time input" << std::endl;
+                std::cerr << RED << "Invalid time input" << RESET << std::endl;
                 return mktime(&currentTime);
             }
             currentTime.tm_hour = hour;
@@ -123,7 +122,7 @@ time_t convertToTimeT(const std::string &input,bool &time_correct)
         }
         else
         {
-            std::cerr << "Failed to parse date and time." << std::endl;
+            std::cerr << RED << "Failed to parse date and time." << RESET << std::endl;
         }
     }
     return mktime(&currentTime);
@@ -157,7 +156,7 @@ bool parseTask(std::istringstream &iss, Task &t)
         //检查指令后是否有参数
         if(it == words.end())
         {
-            std::cerr << "Parameter missing" << std::endl;
+            std::cerr << RED << "Parameter missing" << RESET << std::endl;
             invalidCommand(iss);
             return false;
         }
@@ -173,7 +172,7 @@ bool parseTask(std::istringstream &iss, Task &t)
             const char *Con = (*it).c_str();
             if(std::strlen(Con) >= TASKNAME_SIZE)
             {
-                std::cerr << "Task: Name is too long" << std::endl;
+                std::cerr << RED << "Task: Name is too long" << RESET << std::endl;
                 return false;
             }
             t.name = Con;
@@ -189,7 +188,7 @@ bool parseTask(std::istringstream &iss, Task &t)
             const char *Con = (*it).c_str();
             if(std::strlen(Con) >= TASKCONTENT_SIZE)
             {
-                std::cerr << "Task: Content is too long" << std::endl;
+                std::cerr << RED << "Task: Content is too long" << RESET << std::endl;
                 return false;
             }
             strcpy(t.content, Con);
@@ -270,7 +269,7 @@ bool parseTask(std::istringstream &iss, Task &t)
             const char *Con = (*it).c_str();
             if(strlen(Con) >= TAGNAME_SIZE)
             {
-                std::cerr << "Tag is too long" << std::endl;
+                std::cerr << RED << "Tag is too long" << RESET << std::endl;
                 return false;
             }
             int j = 0;
@@ -320,7 +319,7 @@ bool parseTaskID(std::istringstream &iss, Tasks &using_tasks, uint64_t &id)
     }
     else if(id >= using_tasks.size() || using_tasks[id].status == Task::Abort)
     {
-        std::cerr << "Tasks: No such task" << std::endl;
+        std::cerr << RED << "Tasks: No such task" << RESET << std::endl;
         return false;
     }
     else
@@ -365,7 +364,7 @@ int signin(std::istringstream &iss, Storage &using_file)
     if(!using_file.user().verify_password(password.c_str()))
     {
         using_file.signout();
-        std::cerr << "signin: Wrong password" << std::endl;
+        std::cerr << RED << "signin: Wrong password" << RESET << std::endl;
         return 1;
     }
 
@@ -549,7 +548,7 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
                 return show_low_pri(using_tasks);
             else 
             {
-            std::cerr << "No such priority" << std::endl; 
+            std::cerr << RED << "No such priority" << RESET << std::endl; 
             return 1; 
             }
         }
