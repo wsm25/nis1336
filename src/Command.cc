@@ -404,7 +404,7 @@ int showtask_aux(const std::vector<uint64_t> &v, Tasks &using_tasks)
         std::cout << "showtask: No tasks" << std::endl;
         return 1;
     }
-    std::cout << std::left << std::setw(8) << "taskID";
+    std::cout << std::left << std::setw(8) << "taskID" << " ";
     std::cout << std::left << std::setw(TASKNAME_SIZE) << "name";
     std::cout << std::left << std::setw(21) << "begin time";
     std::cout << std::left << std::setw(21) << "end time";
