@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <ctime>
 #include <unistd.h>
@@ -118,6 +119,7 @@ time_t convertToTimeT(const std::string &input)
 //parse Task
 bool parseTask(std::istringstream &iss, Task &t)
 {
+    //default
     if(iss.eof()) return true;
     std::string word;
     // 用来存储分割后的单词
@@ -142,7 +144,7 @@ bool parseTask(std::istringstream &iss, Task &t)
         //检查指令后是否有参数
         if(it == words.end())
         {
-            std::cerr << *it << ": Parameter missing" << std::endl;
+            std::cerr << *(--it) << ": Parameter missing" << std::endl;
             invalidCommand(iss);
             return false;
         }
@@ -152,6 +154,11 @@ bool parseTask(std::istringstream &iss, Task &t)
         if(*it == "-n")
         {
             it++;
+            if(std::strlen(Con) >= TASKNAME_SIZE)
+            {
+                std::cerr << "Task: Name is too long" << std::endl;
+                return false;
+            }
             t.name = Con;
         }
 
@@ -160,13 +167,10 @@ bool parseTask(std::istringstream &iss, Task &t)
             it++;
             if(std::strlen(Con) >= TASKCONTENT_SIZE)
             {
-                std::cerr << "Length is out of range" << std::endl;
+                std::cerr << "Task: Content is too long" << std::endl;
                 return false;
             }
-            int i = 0;
-            for(; Con[i] != '\0'; ++i)
-                t.content[i] = Con[i];
-            t.content[i] = '\0';
+            strcpy(t.content, Con);
         }
 
         else if(*it == "-b")
@@ -335,7 +339,7 @@ int addtask(std::istringstream &iss, Tasks &using_tasks)
     Task t;
     if(!parseTask(iss, t)) return 1;
     if(iss.eof())
-        return using_tasks.insert(t);
+        return !using_tasks.insert(t);
     else
         return invalidCommand(iss);
 }
@@ -465,7 +469,10 @@ int show_day(Tasks& using_tasks,int days)
     for(auto i : v)
     {
         if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << using_tasks[i].name << std::endl;
+        {
+            std::cout << i << " ";
+            using_tasks[i].showtask();
+        }
     }
     return 0;
 }
@@ -484,7 +491,10 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << i << using_tasks[i].name << std::endl;
+            {
+                std::cout << i << " ";
+                using_tasks[i].showtask();
+            }
         }
         return 0;
     }
@@ -541,7 +551,10 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << i << using_tasks[i].name << std::endl;
+            {
+                std::cout << i << " ";
+                using_tasks[i].showtask();
+            }
         }
         return 0;
     }
@@ -558,7 +571,10 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << i << using_tasks[i].name << std::endl;
+            {
+                std::cout << i << " ";
+                using_tasks[i].showtask();
+            }
         }
         return 0;
     }
@@ -575,7 +591,10 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << i << using_tasks[i].name << std::endl;
+            {
+                std::cout << i << " ";
+                using_tasks[i].showtask();
+            }
         }
         return 0;
     }
@@ -592,7 +611,10 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         for(auto i : v)
         {
             if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-                std::cout << i << using_tasks[i].name << std::endl;
+            {
+                std::cout << i << " ";
+                using_tasks[i].showtask();
+            }
         }
         return 0;
     }
