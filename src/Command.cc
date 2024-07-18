@@ -6,6 +6,7 @@
 #include <ctime>
 #include <unistd.h>
 #include <iomanip>
+#include <chrono>
 
 
 // auxiliary function
@@ -225,10 +226,9 @@ bool parseTask(std::istringstream &iss, Task &t)
                 return false;
             }
             int j = 0;
-            // for(; Con[j] != '\0'; ++j)
-            //     t.tags[j] = Con[j];
-            // t.tags[j] = '\0';
-            t.tags = Con;
+            for(; Con[j] != '\0'; ++j)
+                t.tags[j] = Con[j];
+            t.tags[j] = '\0';
         }
 
         else
@@ -427,7 +427,13 @@ int show_by_tag(Tasks& using_tasks,std::string &word)
     std::cout << "Tasks with tag: " << word << std::endl;
     auto v = using_tasks.select([&](const Task &x) -> bool
         {
-            return x.tags == word.c_str();
+            int i = 0;
+            for(; x.tags[i] != '\0' && word[i] != '\0'; ++i)
+            {
+                if (x.tags[i] != word[i]) return false;
+            }
+            if (x.tags[i] != '\0' || word[i] != '\0') return false;
+            return true;
         });
     if(v.empty())
     {
@@ -445,17 +451,18 @@ int show_by_tag(Tasks& using_tasks,std::string &word)
 bool show_by_day(int days,const Task &using_task)
 {
     time_t rawTime = time(0);
-    struct tm* now = localtime(&rawTime);
-    struct tm* task_begin = localtime(&using_task.begin);
+    struct tm now = *localtime(&rawTime);
+    struct tm task_begin = *localtime(&using_task.begin);
     // Set hours, minutes, seconds to 0 to compare only dates
-    now->tm_hour = 0;
-    now->tm_min = 0;
-    now->tm_sec = 0;
-    task_begin->tm_hour = 0;
-    task_begin->tm_min = 0;
-    task_begin->tm_sec = 0;
-    time_t now_date_only = mktime(now);
-    time_t task_date_only = mktime(task_begin);
+    now.tm_hour = 0;
+    now.tm_min = 0;
+    now.tm_sec = 0;
+    now.tm_mday = now.tm_mday + days;
+    task_begin.tm_hour = 0;
+    task_begin.tm_min = 0;
+    task_begin.tm_sec = 0;
+    time_t now_date_only = mktime(&now);
+    time_t task_date_only = mktime(&task_begin);
     return now_date_only >= task_date_only;
 }
 
