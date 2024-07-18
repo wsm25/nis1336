@@ -36,7 +36,7 @@ Commands:
     -b <time>               set begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. default: now
     -e <time>               set end time. default: begin time
     -r <time>               set remind time. default: begin time
-    -p low|middle|high      set priority. default: none
+    -p low|mid|high         set priority. default: none
     -c <content>            set content. no more than TASKCONTENT_SIZE. default: ""
     -t tag                  set tag. no more than TAGNAME_SIZE. default: null
 
@@ -47,7 +47,7 @@ Commands:
    -r                       show tasks by remind time
    -d <days>                show tasks begin in next n days. default: 1(today)
    -p <pri>                 show task with given priority. default: all
-   -t <tag>                 show tasks with given tags. default: null
+   -t tag                   show tasks with given tags. default: null
 
  edittask <taskID> [arguments]          edit task with given ID
   Arguments:
