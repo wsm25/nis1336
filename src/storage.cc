@@ -16,6 +16,7 @@
 #include <string.h>
 #include <errno.h>
 #include <iostream>
+#include <iomanip>
 #include "storage.h"
 #include <pthread.h>
 
@@ -51,7 +52,7 @@ void Storage::reserve(size_t capacity)
     {
         mapsize = capacity;
         if(ftruncate(fd, mapsize) == -1) goto error;
-        printf("new block: %lu\n", mapsize);
+        //printf("new block: %lu\n", mapsize);
     }
 
     // memory map
@@ -236,7 +237,11 @@ void Storage::insert_task(const Task &task)
     // insert new task
     memcpy((uint8_t *)mapping + *used, &task, sizeof(Task));
     *used += sizeof(Task);
-    printf("insert at %lu\n", *used);
+    //printf("insert at %lu\n", *used);
+    uint64_t len;
+    tasks(len);
+    std::cout << "addtask: " << std::left << std::setw(6) << len - 1 << " ";
+    task.showtask();
 }
 
 #endif

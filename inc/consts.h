@@ -38,7 +38,7 @@ Commands:
     -r <time>               set remind time. default: begin time
     -p low|mid|high         set priority. default: none
     -c <content>            set content. no more than TASKCONTENT_SIZE. default: ""
-    -t tag                  set tag. no more than TAGNAME_SIZE. default: null
+    -t <tag>                set tag. no more than TAGNAME_SIZE. default: null
 
  showtask [arguments]                   show task with given filter and given order
   Arguments:
@@ -47,18 +47,18 @@ Commands:
    -r                       show tasks by remind time
    -d <days>                show tasks begin in next n days. default: 1(today)
    -p <pri>                 show task with given priority. default: all
-   -t tag                   show tasks with given tags. default: null
+   -t <tag>                 show tasks with given tags. default: null
 
  edittask <taskID> [arguments]          edit task with given ID
   Arguments:
    -n <name>                     edit task name. no more than TASKNAME_SIZE
-   -b <time>                     edit begin time. <time>: [YYYY/MM/DD] HH:MM:SS. no repaet begin time
+   -b <time>                     edit begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. no repaet begin time
    -e <time>                     edit end time
    -r <time>                     edit remind time
-   -p low|middle|high            edit priority
+   -p low|mid|high               edit priority
    -c <content>                  edit content. no more than TASKCONTENT_SIZE
-   -t tag                        edit tag. no more than TAGNAME_SIZE
-   -s unfinished|finished|abort  edit status
+   -t <tag>                      edit tag. no more than TAGNAME_SIZE
+   -s unfin|fin|abort            edit status
 
  deltask <taskID>                       delete task with given ID. alias for `edittask <taskID> -s abort`
  )WSM";
@@ -89,10 +89,10 @@ Usage:  help                                    print this help
         addtask [arguments]                     add task to schedule. no repaet begin time
          Arguments:
           -n <name>                 set task name. no more than TASKNAME_SIZE. default: "new task"
-          -b <time>                 set begin time. <time>: [YYYY/MM/DD]-HH:MM:SS. default: now
+          -b <time>                 set begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. default: now
           -e <time>                 set end time. default: begin time
           -r <time>                 set remind time. default: begin time
-          -p low|middle|high        set priority. default: none
+          -p low|mid|high           set priority. default: none
           -c <content>              set content. no more than TASKCONTENT_SIZE. default: ""
           -t tag                    set tag. no more than TAGNAME_SIZE. default: null
 
@@ -103,20 +103,20 @@ Usage:  help                                    print this help
           -r                       show tasks by remind time
           -d <days>                show tasks begin in next n days. default: 1(today)
           -p <pri>                 show task with given priority. default: all
-          -t <tag>                   show tasks with given tags. default: null
+          -t <tag>                 show tasks with given tag. default: null
 
         edittask <taskID> [arguments]           edit task with given ID
          Arguments:
           -n <name>                     edit task name. no more than TASKNAME_SIZE
-          -b <time>                     edit begin time. <time>: [YYYY/MM/DD] HH:MM:SS. no repaet begin time
+          -b <time>                     edit begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. no repaet begin time
           -e <time>                     edit end time
           -r <time>                     edit remind time
-          -p low|middle|high            edit priority
+          -p low|mid|high               edit priority
           -c <content>                  edit content. no more than TASKCONTENT_SIZE
-          -t tag                        edit tag. no more than TAGNAME_SIZE
-          -s unfinished|finished|abort  edit status
+          -t <tag>                      edit tag. no more than TAGNAME_SIZE
+          -s unfin|fin|abort            edit status
 
-        deltask <taskID>            delete task with given ID. alias for `edittask <taskID> -s abort`
+        deltask <taskID>                        delete task with given ID. alias for `edittask <taskID> -s abort`
 )PIPI";
 
 #endif // SCHEDULE_CONSTS_H

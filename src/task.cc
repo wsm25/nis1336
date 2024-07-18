@@ -12,9 +12,9 @@ bool remind_t::check() const
 Task::Task(): name("new task"), 
     priority(None), status(Unfinished), 
     begin(time(NULL)), end(time(NULL)), remind(), 
-    content() {}
+    tags(), content() {}
 
-void Task::showtask()
+void Task::showtask() const
 {
     char time[21];
     std::cout << std::left << std::setw(TASKNAME_SIZE) << name;
@@ -47,8 +47,8 @@ void Task::showtask()
     case Finished: std::cout << std::left << std::setw(6) << "Fin"; break;
     case Abort: std::cout << std::left << std::setw(6) << "Abort"; break;
     }
-    std::cout << std::endl;
-    std::cout << tags << " " << content << std::endl;
+    std::cout << std::left << std::setw(TAGNAME_SIZE) << tags << std::endl;
+    std::cout << "\t" << content << std::endl;
 }
 
 bool operator==(const remind_t &t1, const remind_t &t2)

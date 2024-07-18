@@ -21,15 +21,25 @@ int invalidCommand(std::istringstream &iss)
 
 // parsing
 // parse username with hint
-void parseUsernameHint(std::istringstream &iss, std::string &username)
+bool parseUsernameHint(std::istringstream &iss, std::string &username)
 {
     if(iss.eof())
     {
         std::cout << "Username: ";
         getline(std::cin, username);
+        if(username.find(' ') != username.npos) goto error;
+        else return true;
     }
     else
+    {
         iss >> username;
+        if(iss.fail()) goto error;
+        else return true;
+    }
+
+error:
+    std::cerr << "User: Invalid name" << std::endl;
+    return false;
 }
 
 // parse password with hint
@@ -147,7 +157,7 @@ bool parseTask(std::istringstream &iss, Task &t)
         //检查指令后是否有参数
         if(it == words.end())
         {
-            std::cerr << *(--it) << ": Parameter missing" << std::endl;
+            std::cerr << "Parameter missing" << std::endl;
             invalidCommand(iss);
             return false;
         }
@@ -235,6 +245,18 @@ bool parseTask(std::istringstream &iss, Task &t)
             t.tags[j] = '\0';
         }
 
+        else if(*it == "-s")
+        {
+            it++;
+            if(!strcasecmp(Con, "unfin"))
+                t.status = Task::Unfinished;
+            else if(!strcasecmp(Con, "fin"))
+                t.status = Task::Finished;
+            else if(!strcasecmp(Con, "abort"))
+                t.status = Task::Abort;
+            else return false;
+        }
+
         else
         {
             invalidCommand(iss);
@@ -274,7 +296,7 @@ int signup(std::istringstream &iss, Storage &using_file)
 
     //<username>
     //allow typing with hints
-    parseUsernameHint(iss, username);
+    if(!parseUsernameHint(iss, username)) return 1;
     if(!user.set_username(username.c_str())) return 1;
 
     //<password>
@@ -295,7 +317,7 @@ int signin(std::istringstream &iss, Storage &using_file)
     std::string username, password;
 
     //<username>
-    parseUsernameHint(iss, username);
+    if(!parseUsernameHint(iss, username)) return 1;
     using_file.signin(username.c_str());
     if(using_file.fail()) return 1;
 
@@ -315,7 +337,7 @@ int signin(std::istringstream &iss, Storage &using_file)
 int editname(std::istringstream &iss, Storage &using_file)
 {
     std::string username;
-    parseUsernameHint(iss, username);
+    if(!parseUsernameHint(iss, username)) return 1;
     if(iss.eof())
         return !using_file.edit_name(username.c_str());
     else
@@ -375,55 +397,51 @@ int edittask(std::istringstream &iss, Tasks &using_tasks)
     return 0;
 }
 
+int showtask_aux(const std::vector<uint64_t> &v, Tasks &using_tasks)
+{
+    if(v.empty())
+    {
+        std::cout << "showtask: No tasks" << std::endl;
+        return 1;
+    }
+    std::cout << std::left << std::setw(8) << "taskID";
+    std::cout << std::left << std::setw(TASKNAME_SIZE) << "name";
+    std::cout << std::left << std::setw(21) << "begin time";
+    std::cout << std::left << std::setw(21) << "end time";
+    std::cout << std::left << std::setw(21) << "remind time";
+    std::cout << std::left << std::setw(5) << "pri";
+    std::cout << std::left << std::setw(6) << "stat";
+    std::cout << std::left << std::setw(TAGNAME_SIZE) << "tag" << std::endl;
+    std::cout << "\t" << "content" << std::endl;
+
+    for(auto i : v)
+    {
+        if(using_tasks[i].status == Task::Abort) continue;
+        std::cout << std::left << std::setw(8) << i << " ";
+        using_tasks[i].showtask();
+    }
+    return 0;
+}
+
 int show_high_pri (Tasks& using_tasks)
 {
     std::cout << "Tasks with high priority: " << std::endl;
     auto v = using_tasks.select(&Task::priority, Task::High);
-    if(v.empty())
-    {
-        std::cout << "No such task" << std ::endl;
-        return 0;
-    }
-    for(auto i : v)
-    {
-        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << "ID: " << std::setw(5) << std::left << i << std::setw(20) << using_tasks[i].name << std::endl;
-    }
-    return 0;
+    return showtask_aux(v, using_tasks);
 }
 
 int show_mid_pri (Tasks& using_tasks)
 {
     std::cout << "Tasks with middle priority: " << std::endl;
     auto v = using_tasks.select(&Task::priority, Task::Mid);
-    if(v.empty())
-    {
-        std::cout << "No such task" << std ::endl;
-        return 0;
-    }
-    for(auto i : v)
-    {
-        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << "ID: " << std::setw(5) << std::left << i << std::setw(20) << using_tasks[i].name << std::endl;
-    }
-    return 0;
+    return showtask_aux(v, using_tasks);
 }
 
 int show_low_pri (Tasks& using_tasks)
 {
     std::cout << "Tasks with low priority: " << std::endl;
     auto v = using_tasks.select(&Task::priority, Task::Low);
-    if(v.empty())
-    {
-        std::cout << "No such task" << std ::endl;
-        return 0;
-    }
-    for(auto i : v)
-    {
-        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << "ID: " << std::setw(5) << std::left << i << std::setw(20) << using_tasks[i].name << std::endl;
-    }
-    return 0;
+    return showtask_aux(v, using_tasks);
 }
 
 int show_by_tag(Tasks& using_tasks,std::string &word)
@@ -439,17 +457,7 @@ int show_by_tag(Tasks& using_tasks,std::string &word)
             if (x.tags[i] != '\0' || word[i] != '\0') return false;
             return true;
         });
-    if(v.empty())
-    {
-        std::cout << "No such task" << std ::endl;
-        return 0;
-    }
-    for(auto i : v)
-    {
-        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            std::cout << using_tasks[i].name << std::endl;
-    }
-    return 0;
+    return showtask_aux(v, using_tasks);
 }
 
 bool show_by_day(int days,const Task &using_task)
@@ -478,42 +486,17 @@ int show_day(Tasks& using_tasks,int days)
         return show_by_day(days,x);
     });
 
-    if(v.empty())
-    {
-        std::cout << "No such task" << std ::endl;
-        return 0;
-    }
-    for(auto i : v)
-    {
-        if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-        {
-            std::cout << i << " ";
-            using_tasks[i].showtask();
-        }
-    }
-    return 0;
+    return showtask_aux(v, using_tasks);
 }
+
 int showtask(std::istringstream &iss, Tasks &using_tasks)
 {
     //default
     if(iss.eof())
     {
-        std::cout << "Show all tasks by begin time:" << std::endl;
+        std::cout << "Tasks by begin time:" << std::endl;
         auto v = using_tasks.sort(&Task::begin);
-        if(v.empty())
-        {
-            std::cout << "No tasks" << std::endl;
-            return 1;
-        }
-        for(auto i : v)
-        {
-            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            {
-                std::cout << i << " ";
-                using_tasks[i].showtask();
-            }
-        }
-        return 0;
+        return showtask_aux(v, using_tasks);
     }
 
     std::string word;
@@ -558,82 +541,30 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
     //iss.eof();
     if(word == "-r")
     {
-        std::cout << "Show all tasks by remind time:" << std::endl;
+        std::cout << "Tasks by remind time:" << std::endl;
         auto v = using_tasks.sort(&Task::remind);
-        if(v.empty())
-        {
-            std::cout << "No tasks" << std::endl;
-            return 1;
-        }
-        for(auto i : v)
-        {
-            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            {
-                std::cout << i << " ";
-                using_tasks[i].showtask();
-            }
-        }
-        return 0;
+        return showtask_aux(v, using_tasks);
     }
 
     else if(word == "-b")
     {
-        std::cout << "Show all tasks by begin time:" << std::endl;
+        std::cout << "Tasks by begin time:" << std::endl;
         auto v = using_tasks.sort(&Task::begin);
-        if(v.empty())
-        {
-            std::cout << "No tasks" << std::endl;
-            return 1;
-        }
-        for(auto i : v)
-        {
-            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            {
-                std::cout << i << " ";
-                using_tasks[i].showtask();
-            }
-        }
-        return 0;
+        return showtask_aux(v, using_tasks);
     }
 
     else if(word == "-e")
     {
-        std::cout << "Show all tasks by end time:" << std::endl;
+        std::cout << "Tasks by end time:" << std::endl;
         auto v = using_tasks.sort(&Task::end);
-        if(v.empty())
-        {
-            std::cout << "No tasks" << std::endl;
-            return 1;
-        }
-        for(auto i : v)
-        {
-            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            {
-                std::cout << i << " ";
-                using_tasks[i].showtask();
-            }
-        }
-        return 0;
+        return showtask_aux(v, using_tasks);
     }
 
     else if(word == "-p")
     {
-        std::cout << "Show all tasks by priority:" << std::endl;
+        std::cout << "Tasks by priority:" << std::endl;
         auto v = using_tasks.sort(&Task::begin);
-        if(v.empty())
-        {
-            std::cout << "No tasks" << std::endl;
-            return 1;
-        }
-        for(auto i : v)
-        {
-            if(using_tasks[i].status == Task::Unfinished && !using_tasks[i].remind.isReminded)
-            {
-                std::cout << i << " ";
-                using_tasks[i].showtask();
-            }
-        }
-        return 0;
+        return showtask_aux(v, using_tasks);
     }
 
     else if(word == "-d")
