@@ -32,13 +32,13 @@ Commands:
 
  addtask [arguments]                    add task to schedule. no repaet begin time
   Arguments:
-    -n <name>               set task name. no more than TASKNAME_SIZE. default: "new task"
+    -n <name>               set task name. no more than 20. default: "new task"
     -b <time>               set begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. default: now
     -e <time>               set end time. default: begin time
     -r <time>               set remind time. default: begin time
     -p low|mid|high         set priority. default: none
-    -c <content>            set content. no more than TASKCONTENT_SIZE. default: ""
-    -t <tag>                set tag. no more than TAGNAME_SIZE. default: null
+    -c <content>            set content. no more than 1024. default: ""
+    -t <tag>                set tag. no more than 16. default: null
 
  showtask [arguments]                   show task with given filter and given order
   Arguments:
@@ -51,13 +51,13 @@ Commands:
 
  edittask <taskID> [arguments]          edit task with given ID
   Arguments:
-   -n <name>                     edit task name. no more than TASKNAME_SIZE
+   -n <name>                     edit task name. no more than 20
    -b <time>                     edit begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. no repaet begin time
    -e <time>                     edit end time
    -r <time>                     edit remind time
    -p low|mid|high               edit priority
-   -c <content>                  edit content. no more than TASKCONTENT_SIZE
-   -t <tag>                      edit tag. no more than TAGNAME_SIZE
+   -c <content>                  edit content. no more than 1024
+   -t <tag>                      edit tag. no more than 16
    -s unfin|fin|abort            edit status
 
  deltask <taskID>                       delete task with given ID. alias for `edittask <taskID> -s abort`
@@ -88,13 +88,13 @@ Usage:  help                                    print this help
 
         addtask [arguments]                     add task to schedule. no repaet begin time
          Arguments:
-          -n <name>                 set task name. no more than TASKNAME_SIZE. default: "new task"
+          -n <name>                 set task name. no more than 20. default: "new task"
           -b <time>                 set begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. default: now
           -e <time>                 set end time. default: begin time
           -r <time>                 set remind time. default: begin time
           -p low|mid|high           set priority. default: none
-          -c <content>              set content. no more than TASKCONTENT_SIZE. default: ""
-          -t tag                    set tag. no more than TAGNAME_SIZE. default: null
+          -c <content>              set content. no more than 1024. default: ""
+          -t tag                    set tag. no more than 16. default: null
 
         showtask [arguments]                    show task with given filter and given order
          Arguments:
@@ -107,13 +107,13 @@ Usage:  help                                    print this help
 
         edittask <taskID> [arguments]           edit task with given ID
          Arguments:
-          -n <name>                     edit task name. no more than TASKNAME_SIZE
+          -n <name>                     edit task name. no more than 20
           -b <time>                     edit begin time. <time>: [YYYY/MM/DD-]HH:MM:SS. no repaet begin time
           -e <time>                     edit end time
           -r <time>                     edit remind time
           -p low|mid|high               edit priority
-          -c <content>                  edit content. no more than TASKCONTENT_SIZE
-          -t <tag>                      edit tag. no more than TAGNAME_SIZE
+          -c <content>                  edit content. no more than 1024
+          -t <tag>                      edit tag. no more than 16
           -s unfin|fin|abort            edit status
 
         deltask <taskID>                        delete task with given ID. alias for `edittask <taskID> -s abort`

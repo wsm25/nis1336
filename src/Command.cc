@@ -488,13 +488,7 @@ int show_by_tag(Tasks& using_tasks,std::string &word)
     std::cout << "Tasks with tag: " << word << std::endl;
     auto v = using_tasks.select([&](const Task &x) -> bool
         {
-            int i = 0;
-            for(; x.tags[i] != '\0' && word[i] != '\0'; ++i)
-            {
-                if (x.tags[i] != word[i]) return false;
-            }
-            if (x.tags[i] != '\0' || word[i] != '\0') return false;
-            return true;
+            return !strcmp(x.tags, word.c_str());
         });
     return showtask_aux(v, using_tasks);
 }
@@ -519,7 +513,7 @@ bool show_by_day(int days,const Task &using_task)
 
 int show_day(Tasks& using_tasks,int days)
 {
-    std::cout << "Tasks in " << days << "days: " << std::endl;
+    std::cout << "Tasks in " << days << " days: " << std::endl;
     auto v = using_tasks.select([&days](const Task &x) -> bool
     {
         return show_by_day(days,x);
@@ -540,12 +534,12 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
 
     std::string word;
     iss >> word;
-    if(!iss.eof())
+    if(iss.fail() || !iss.eof())
     {
         if(word == "-p")
         {
             iss >> word;
-            if(!iss.eof())
+            if(iss.fail() || !iss.eof())
                 return invalidCommand(iss);
             if(strcasecmp(word.c_str(),"high") == 0)
                 return show_high_pri(using_tasks);
@@ -562,7 +556,7 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
         else if(word == "-t")
         {
             iss >> word;
-            if(!iss.eof())
+            if(iss.fail() || !iss.eof())
                 return invalidCommand(iss);
             return show_by_tag(using_tasks,word);
         }
