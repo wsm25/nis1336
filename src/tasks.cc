@@ -72,7 +72,7 @@ std::vector<uint64_t> Tasks::select(std::function<bool(const Task &)> pred) cons
 
     std::vector<uint64_t> v;
     for(uint64_t i = 0; i < len; ++i)
-        if(pred(arr[i]))
+        if(pred(arr[i]) && arr[i].status != Task::Abort)
             v.push_back(i);
     return v;
 }
@@ -93,7 +93,8 @@ std::vector<uint64_t> Tasks::sort(std::function<bool(const Task &, const Task &)
 
     std::vector<uint64_t> v;
     for(uint64_t i = 0; i < len; ++i)
-        v.push_back(i);
+        if(arr[i].status != Task::Abort)
+            v.push_back(i);
     std::sort(v.begin(), v.end(), [&](uint64_t x, uint64_t y) -> bool
         {
             return cmp(arr[x], arr[y]);

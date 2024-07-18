@@ -454,7 +454,6 @@ int showtask_aux(const std::vector<uint64_t> &v, Tasks &using_tasks)
 
     for(auto i : v)
     {
-        if(using_tasks[i].status == Task::Abort) continue;
         std::cout << std::left << std::setw(8) << i << " ";
         using_tasks[i].showtask();
     }
