@@ -1,0 +1,11 @@
+signup Bob 1
+help
+editname Carrol
+editpwd 3
+addtask
+edittask 0 -s fin
+showtask
+signout
+signin Bob 1
+signin Carrol 3
+quit

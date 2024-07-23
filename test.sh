@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# preparation
+if [ ! -d 'data' ]; then mkdir data; fi
+
+# terminal interface
 ./schedule help
 ./schedule alice 1234 signup
 ./schedule alice 1234 addtask -n task1 -b 23:59:24 
@@ -18,3 +23,7 @@
 ./schedule alice 1234 edittask 1 -n TASK2 -b 2024/8/17-23:59:24 -r 2024/8/17-23:59:00 -e 2024/8/17-23:59:59 -p mid -s unfin
 ./schedule alice 1234 addtask -b 2024/0/7-12:81:21
 ./schedule alice 1234 cancel
+
+# shell interface
+./schedule run < test.txt
+./schedule Carrol 3 cancel
