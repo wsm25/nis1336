@@ -23,7 +23,7 @@ bool parseUsernameHint(std::istringstream &iss, std::string &username)
     if(iss.eof())
     {
         std::cout << "Username: " << std::flush;
-        getline(std::cin, username);
+        std::getline(std::cin, username);
         if(username.find(' ') != username.npos) goto error;
         else return true;
     }

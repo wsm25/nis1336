@@ -67,7 +67,7 @@ int schedule::shell()
         std::cout << "(schedule) ";
 
         std::string inputLine;
-        getline(std::cin, inputLine);
+        std::getline(std::cin, inputLine);
         if(std::cin.fail()) return 0;
         if(inputLine.empty()) continue;
 
@@ -111,7 +111,7 @@ int user::shell()
     {
         std::cout << "(" << using_file.user().Name() << ") " << std::flush;
         std::string inputLine;
-        getline(std::cin, inputLine);
+        std::getline(std::cin, inputLine);
         if(std::cin.fail()) return 0;
         if(inputLine.empty()) continue;
 
