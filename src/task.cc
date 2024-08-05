@@ -19,13 +19,9 @@ void Task::showtask() const
     char time[21];
     std::cout << std::left << std::setw(TASKNAME_SIZE) << name;
 
-    struct tm local_time_b;
-    struct tm local_time_r;
-    struct tm local_time_e;
-
-    localtime_r(&begin, &local_time_b);
-    localtime_r(&remind.t, &local_time_r);
-    localtime_r(&end, &local_time_e);
+    struct tm local_time_b = *localtime(&begin);
+    struct tm local_time_r = *localtime(&remind.t);
+    struct tm local_time_e = *localtime(&end);
 
     strftime(time, sizeof(time), "%Y/%m/%d-%T", &local_time_b);
     std::cout << std::left << std::setw(21) << time;

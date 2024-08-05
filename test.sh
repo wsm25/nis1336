@@ -25,5 +25,15 @@ if [ ! -d 'data' ]; then mkdir data; fi
 ./schedule alice 1234 cancel
 
 # shell interface
-./schedule run < test.txt
+echo "signup Bob 1
+help
+editname Carrol
+editpwd 3
+addtask
+edittask 0 -s fin
+showtask
+signout
+signin Bob 1
+signin Carrol 3
+quit" | ./schedule run
 ./schedule Carrol 3 cancel

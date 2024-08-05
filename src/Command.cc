@@ -5,9 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <ctime>
-#include <unistd.h>
 #include <iomanip>
-
 
 // auxiliary function
 
@@ -24,7 +22,7 @@ bool parseUsernameHint(std::istringstream &iss, std::string &username)
 {
     if(iss.eof())
     {
-        std::cout << "Username: ";
+        std::cout << "Username: " << std::flush;
         getline(std::cin, username);
         if(username.find(' ') != username.npos) goto error;
         else return true;
@@ -41,11 +39,41 @@ error:
     return false;
 }
 
+// getpass
+#if defined(_WIN32)
+#include <windows.h>
+
+std::string getpass(const char *prompt)
+{
+    std::string password;
+
+    std::cout << prompt << std::flush;
+
+    HANDLE consoleInput = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode;
+    GetConsoleMode(consoleInput, &mode);
+    SetConsoleMode(consoleInput, mode & ~ENABLE_ECHO_INPUT);
+
+    std::getline(std::cin, password);
+    std::cout << std::endl;
+
+    SetConsoleMode(consoleInput, mode);
+
+    return password;
+}
+
+#elif defined(__unix__)
+#include <unistd.h>
+// char *getpass(const char *__prompt);
+#else
+#error Current platform is not supported
+#endif
+
 // parse password with hint
 void parsePwdHint(std::istringstream &iss, std::string &password)
 {
     if(iss.eof())
-        password = std::string(getpass("Password: "));
+        password = getpass("Password: ");
     else
         iss >> password;
 }

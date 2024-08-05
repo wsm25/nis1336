@@ -5,12 +5,20 @@
 #include "user.h"
 
 #include <stddef.h> // size_t
+#ifdef _WIN32
+#include <windef.h> // HANDLE, LPVOID
+#endif
 
 class Storage
 {
 private:
+#if defined(_WIN32)
+    HANDLE hFile; // file handle
+    LPVOID mapping; // mapping address
+#elif defined(__unix__)
     int fd; // file description
     void *mapping; // mapping address
+#endif
     size_t *used; // used size
     size_t mapsize; // mapping size
 

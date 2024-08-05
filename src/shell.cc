@@ -1,7 +1,7 @@
 #include "shell.h"
+#include <mutex>
 
-#include <pthread.h>
-extern pthread_mutex_t lock;
+extern std::mutex mutex;
 
 ///static member
 //terminal
@@ -24,7 +24,7 @@ std::istringstream user::iss;
 bool user::isstopped;
 Storage user::using_file;
 Tasks user::using_tasks(user::using_file);
-pthread_t user::remind_thread;
+std::thread user::remind_thread;
 
 const user::CMDS user::cmds = {{"help", help}, {"signout", signout}, {"quit", quit}, 
     {"editname", editname}, {"editpwd", editpwd}, {"cancel", cancel},
@@ -92,21 +92,24 @@ int user::shell()
     isstopped = false;
 
     ///asynchronize std::cin and std::cout
-    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
 
-    pthread_mutex_init(&lock, 0);
-
-    if(errno = pthread_create(&remind_thread, NULL, remind, NULL))
+    try
     {
-        perror("remind thread: ");
+        remind_thread = std::thread(remind);
+    }
+    catch(const std::system_error& e)
+    {
+        std::cerr << RED << "remind thread : " << e.what() << RESET << std::endl;
         return 1;
     }
+    
 
     std::cout << "Welcome: " << using_file.user().Name() << std::endl;
     iss.setstate(iss.eofbit); showtask();
     while(true)
     {
-        std::cout << "(" << using_file.user().Name() << ") ";
+        std::cout << "(" << using_file.user().Name() << ") " << std::flush;
         std::string inputLine;
         getline(std::cin, inputLine);
         if(std::cin.fail()) return 0;
@@ -217,7 +220,7 @@ void user::quit()
     if(iss.eof())
     {
         isstopped = true;
-        pthread_join(remind_thread, NULL);
+        remind_thread.join();
         using_file.signout();
         schedule::isstopped = true;
     }
@@ -230,7 +233,7 @@ void user::signout()
     if(iss.eof())
     {
         isstopped = true;
-        pthread_join(remind_thread, NULL);
+        remind_thread.join();
         using_file.signout();
     }
     else
@@ -242,18 +245,18 @@ void user::cancel()
     if(iss.eof())
     {
         isstopped = true;
-        pthread_join(remind_thread, NULL);
+        remind_thread.join();
         using_file.cancel();
     }
     else
         invalidCommand(iss);
 }
 
-void *user::remind(void *args)
+void *user::remind()
 {
     while(true)
     {
-        pthread_mutex_lock(&lock);
+        mutex.lock();
         auto v = using_tasks.select(
             [&](const Task &task) -> bool {
                 return (task.status == Task::Unfinished && task.remind.check());
@@ -267,7 +270,7 @@ void *user::remind(void *args)
             std::cout << "\n\nTime for: " << i << " " << remind_task.name << "\n\a" << std::endl;
             remind_task.remind.isReminded = true;
         }
-        pthread_mutex_unlock(&lock);
+        mutex.unlock();
         if(isstopped) break;
         sleep(1);
     }

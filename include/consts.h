@@ -9,11 +9,11 @@
 #define MAX_TAGS_PER_TASK 16
 #define MAX_TAGS_PER_USER 128
 
-#define HASHEDPASSED_SIZE 128
+#define HASHEDPASSED_SIZE 129
 #define PASSWORD_SIZE 20
 
-#define DATADIR "data/"
-#define FILEPATH_SIZE 44 // (DATADIR_SIZE - 1) + 2 * (USERNAME_SIZE - 1) + 1
+constexpr char DATAPATH[] = "data/";
+#define FILEPATH_SIZE 44 // (DATAPATH_SIZE - 1) + 2 * (USERNAME_SIZE - 1) + 1
 
 #define RESET "\033[0m"
 #define RED "\033[31m"

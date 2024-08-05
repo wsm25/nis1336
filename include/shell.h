@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
+#include <thread>
 
 class terminal
 {
@@ -59,14 +60,14 @@ private:
     static void editname(); static void editpwd(); static void cancel();
     static void addtask(); static void edittask(); static void showtask(); static void deltask();
     //thread-related function
-    static void *remind(void *arg);
+    static void *remind();
     
     ///member
     static std::istringstream iss;
     static bool isstopped;
     static Storage using_file;
     static Tasks using_tasks;
-    static pthread_t remind_thread;
+    static std::thread remind_thread;
     typedef std::unordered_map<std::string, void(*)()> CMDS;
     static const CMDS cmds;
 

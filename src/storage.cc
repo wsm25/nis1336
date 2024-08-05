@@ -3,24 +3,44 @@
 //! Basic layout:
 //! (Metadata | User | Task[N])
 //! 
-//! We use `mmap` on posix platforms.
-#ifndef __unix__
-#error Only support Unix platform
-#else
-
-#include <stdio.h>
+//! We use `mmap` on posix platforms, and `MapViewOfFile` on windows
+#if defined(_WIN32)
+#include <windows.h>
+#elif defined(__unix__)
+#include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#else
+#error Current platform is not supported
+#endif
+
+#include <stdio.h>
 #include <string.h>
-#include <errno.h>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include "storage.h"
-#include <pthread.h>
+#include <mutex>
 
-pthread_mutex_t lock;
+#if defined(_WIN32)
+#include <winerror.h>
+void PrintError(const char *ErrMsg)
+{
+    LPVOID lpvMessageBuffer;
+
+    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, GetLastError(), 0, (LPSTR)&lpvMessageBuffer, 0, NULL);
+
+    std::cerr << ErrMsg << ": " << (char *)lpvMessageBuffer;
+
+    LocalFree(lpvMessageBuffer);
+}
+#elif defined(__unix__)
+#include <errno.h>
+#endif
+
+std::mutex mutex;
 
 struct Metadata
 {
@@ -37,43 +57,69 @@ void Storage::get_filepath(const char *username, char *filepath)
 {
     char filename[2 * USERNAME_SIZE - 1];
     hex_encode(username, filename);
-    strcpy(filepath, DATADIR);
+    strcpy(filepath, DATAPATH);
     strcat(filepath, filename);
 }
 
 void Storage::reserve(size_t capacity)
 {
-    pthread_mutex_lock(&lock);
+    mutex.lock();
+    HANDLE hFileMappingObject;
+
     // unmap
-    if(!fail()) munmap(mapping, mapsize);
+    if(!fail())
+#if defined(_WIN32)
+        if(!UnmapViewOfFile(mapping)) goto error;
+#elif defined(__unix__)
+        if(munmap(mapping, mapsize) == -1) goto error;
+#endif
 
     // resize the file
     if(mapsize < capacity)
     {
         mapsize = capacity;
+#ifdef __unix__
         if(ftruncate(fd, mapsize) == -1) goto error;
+#endif
         //printf("new block: %lu\n", mapsize);
     }
 
     // memory map
+#if defined(_WIN32)
+    hFileMappingObject = CreateFileMappingA(hFile, NULL, PAGE_READWRITE, mapsize >> 32, mapsize & 0xffffffff, NULL);
+    if(hFileMappingObject == NULL) goto error;
+    mapping = MapViewOfFile(hFileMappingObject, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+    if(!CloseHandle(hFileMappingObject) || mapping == NULL) goto error;
+#elif defined(__unix__)
     mapping = mmap(NULL, mapsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if(mapping == MAP_FAILED) goto error;
+#endif
 
     // initialize
     used = &((Metadata *)mapping)->used;
-    
+
 end:
-    pthread_mutex_unlock(&lock);
+    mutex.unlock();
     return;
 error:
     mapsize = 0;
+#if defined(_WIN32)
+    CloseHandle(hFile);
+    hFile = INVALID_HANDLE_VALUE;
+    PrintError("reserve");
+#elif defined(__unix__)
     close(fd);
     fd = -1;
     perror("reserve");
+#endif
     goto end;
 }
 
-Storage::Storage(): fd(-1), mapping(MAP_FAILED), mapsize(0) {}
+#if defined(_WIN32)
+Storage::Storage(): hFile(INVALID_HANDLE_VALUE), mapping(NULL), mapsize(0) {}
+#elif defined(__unix__)
+Storage::Storage() : fd(-1), mapping(MAP_FAILED), mapsize(0) {}
+#endif
 
 Storage::Storage(const char *name): Storage()
 {
@@ -92,7 +138,11 @@ Storage::~Storage()
 
 bool Storage::fail() const
 {
+#if defined(_WIN32)
+    return hFile == INVALID_HANDLE_VALUE || mapping == NULL;
+#elif defined(__unix__)
     return fd == -1 || mapping == MAP_FAILED;
+#endif
 }
 
 void Storage::signup(const User &user)
@@ -103,6 +153,17 @@ void Storage::signup(const User &user)
     // create file
     char filepath[FILEPATH_SIZE];
     get_filepath(user.Name(), filepath);
+#if defined(_WIN32)
+    hFile = CreateFileA(filepath,
+        GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+        CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(hFile == INVALID_HANDLE_VALUE)
+    {
+        if(GetLastError() == ERROR_FILE_EXISTS) std::cerr << RED << "signup: Username exists" << RESET << std::endl;
+        else PrintError("signup");
+        return;
+    }
+#elif defined(__unix__)
     fd = open(filepath, O_RDWR | O_CREAT | O_EXCL, 0666);
     if(fd == -1)
     {
@@ -110,20 +171,43 @@ void Storage::signup(const User &user)
         else perror("signup");
         return;
     }
+#endif
 
     // initialize
-    Metadata meta = { sizeof(Metadata) + sizeof(User) };
+    Metadata meta = {sizeof(Metadata) + sizeof(User)};
+#if defined(_WIN32)
+    DWORD numberOfCharsToRead = 0;
+    if(!WriteFile(hFile, &meta, sizeof(Metadata), &numberOfCharsToRead, NULL)) goto error;
+    if(numberOfCharsToRead != sizeof(Metadata))
+    {
+        std::cerr << RED << "signup: failed to write meta" << RESET << std::endl;
+        goto error;
+    }
+    if(!WriteFile(hFile, &user, sizeof(User), &numberOfCharsToRead, NULL)) goto error;
+    if(numberOfCharsToRead != sizeof(User))
+    {
+        std::cerr << RED << "signup: failed to write user" << RESET << std::endl;
+        goto error;
+    }
+#elif defined(__unix__)
     if(write(fd, &meta, sizeof(Metadata)) == -1) goto error;
     if(write(fd, &user, sizeof(User)) == -1) goto error;
+#endif
     reserve(meta.used + 2 * sizeof(Task)); // reserve 2 task space
 
 end:
     std::cout << "New user: " << user.Name() << std::endl;
     return;
 error:
+#if defined(_WIN32)
+    CloseHandle(hFile);
+    hFile = INVALID_HANDLE_VALUE;
+    PrintError("signup");
+#elif defined(__unix__)
     close(fd);
     fd = -1;
-    perror("signup");
+    perror("sinup");
+#endif
 }
 
 void Storage::signin(const char *name)
@@ -139,6 +223,17 @@ void Storage::signin(const char *name)
     }
     char filepath[FILEPATH_SIZE];
     get_filepath(name, filepath);
+#if defined(_WIN32)
+    hFile = CreateFileA(filepath,
+        GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(hFile == INVALID_HANDLE_VALUE)
+    {
+        if(GetLastError() == ERROR_FILE_NOT_FOUND) std::cerr << RED << "signin: No such user" << RESET << std::endl;
+        else PrintError("signin");
+        return;
+    }
+#elif defined(__unix__)
     fd = open(filepath, O_RDWR, 0666);
     if(fd == -1)
     {
@@ -146,37 +241,76 @@ void Storage::signin(const char *name)
         else perror("signin");
         return;
     }
+#endif
 
     // check file
     Metadata meta;
     User user;
+#if defined(_WIN32)
+    DWORD numberOfCharsToRead = 0;
+    if(!ReadFile(hFile, &meta, sizeof(Metadata), &numberOfCharsToRead, NULL)) goto error;
+    if(numberOfCharsToRead != sizeof(Metadata))
+    {
+        std::cerr << RED << "signin: failed to read meta" << RESET << std::endl;
+        goto error;
+    }
+    if(!ReadFile(hFile, &user, sizeof(User), &numberOfCharsToRead, NULL)) goto error;
+    if(numberOfCharsToRead != sizeof(User))
+    {
+        std::cerr << RED << "signin: failed to read user" << RESET << std::endl;
+        goto error;
+    }
+    if(strcmp(name, user.Name())) { SetLastError(ERROR_DATA_CHECKSUM_ERROR); goto error; }
+#elif defined(__unix__)
     if(read(fd, &meta, sizeof(Metadata)) == -1) goto error;
     if(read(fd, &user, sizeof(User)) == -1) goto error;
     if(strcmp(name, user.Name())) { errno = ENODATA; goto error; }
+#endif
 
     // file status
+#if defined(_WIN32)
+    DWORD fileSizeHigh;
+    mapsize = GetFileSize(hFile, &fileSizeHigh);
+    if(mapsize == INVALID_FILE_SIZE) { mapsize = 0; goto error; }
+    mapsize += (size_t)fileSizeHigh << 32;
+#elif defined(__unix__)
     struct stat filestatus;
     if(fstat(fd, &filestatus) == -1) goto error;
     mapsize = filestatus.st_size;
-    
+#endif
+
     //initialize
     reserve(mapsize);
 
 end:
     return;
 error:
+#if defined(_WIN32)
+    CloseHandle(hFile);
+    hFile = INVALID_HANDLE_VALUE;
+    PrintError("signin");
+#elif defined(__unix__)
     close(fd);
     fd = -1;
     perror("signin");
+#endif
 }
 
 void Storage::signout()
 {
-    munmap(mapping, mapsize);
+#if defined(_WIN32)
+    if(!UnmapViewOfFile(mapping)) PrintError("signout");
+    mapping = NULL;
+    mapsize = 0;
+    if(!CloseHandle(hFile)) PrintError("signout");
+    hFile = INVALID_HANDLE_VALUE;
+#elif defined(__unix__)
+    if(munmap(mapping, mapsize) == -1) perror("signout");
     mapping = MAP_FAILED;
     mapsize = 0;
-    close(fd);
+    if(close(fd) == -1) perror("signout");
     fd = -1;
+#endif
 }
 
 void Storage::cancel()
@@ -184,33 +318,48 @@ void Storage::cancel()
     char filepath[FILEPATH_SIZE];
     get_filepath(user().Name(), filepath);
     signout();
-    remove(filepath);
+    if(remove(filepath) == -1) perror("cancel");
 }
 
 bool Storage::edit_name(const char *name)
 {
-    char tmp[USERNAME_SIZE];
-    strcpy(tmp, user().Name());
-    char oldpath[FILEPATH_SIZE];
-    get_filepath(user().Name(), oldpath);
-
-    if(!user().set_username(name)) return false;
+    if(!User().set_username(name)) return false;
     char newpath[FILEPATH_SIZE];
-    get_filepath(user().Name(), newpath);
-
-    if(access(newpath, F_OK) == 0)
+    get_filepath(name, newpath);
+    if(std::ifstream{newpath})
     {
-        user().set_username(tmp);
         std::cerr << RED << "editname: Username exists" << RESET << std::endl;
         return false;
     }
 
+#if defined(_WIN32)
+    if(!CloseHandle(hFile))
+    {
+        PrintError("signout");
+        return false;
+    }
+#endif
+
+    char oldpath[FILEPATH_SIZE];
+    get_filepath(user().Name(), oldpath);
     if(rename(oldpath, newpath) == -1)
     {
-        user().set_username(tmp);
         perror("editname");
         return false;
     }
+    user().set_username(name);
+
+#if defined(_WIN32)
+    hFile = CreateFileA(newpath,
+        GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(hFile == INVALID_HANDLE_VALUE)
+    {
+        PrintError("editname");
+        return false;
+    }
+#endif
+
     return true;
 }
 
@@ -243,5 +392,3 @@ void Storage::insert_task(const Task &task)
     std::cout << "addtask: " << std::left << std::setw(6) << len - 1 << " ";
     task.showtask();
 }
-
-#endif
