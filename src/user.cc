@@ -6,7 +6,7 @@
 #include "user.h"
 
 // Remain `user` uninitialized
-User::User(): name(), pwdunset(true), tagcount(0), tags() {}
+User::User(): name(), pwdunset(true), tags(), tagcount(0) {}
 
 /// Initialize all fields
 User::User(const char *username): User()

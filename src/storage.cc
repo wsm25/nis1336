@@ -64,7 +64,9 @@ void Storage::get_filepath(const char *username, char *filepath)
 void Storage::reserve(size_t capacity)
 {
     mutex.lock();
+#if defined(_WIN32)
     HANDLE hFileMappingObject;
+#endif
 
     // unmap
     if(!fail())
@@ -208,6 +210,7 @@ error:
     fd = -1;
     perror("sinup");
 #endif
+    goto end;
 }
 
 void Storage::signin(const char *name)
@@ -294,6 +297,7 @@ error:
     fd = -1;
     perror("signin");
 #endif
+    goto end;
 }
 
 void Storage::signout()

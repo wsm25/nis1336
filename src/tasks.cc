@@ -40,7 +40,7 @@ uint64_t Tasks::size() const
 {
     if(s->fail()) throw std::runtime_error("Out of memory");
     uint64_t len;
-    Task *arr = s->tasks(len);
+    s->tasks(len);
     return len;
 }
 

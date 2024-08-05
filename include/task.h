@@ -36,9 +36,9 @@ struct Task
     Array<char, TASKNAME_SIZE> name;
     time_t begin, end;
     remind_t remind;
-    Array<char, TAGNAME_SIZE> tags;
     Priority priority;
     Status status;
+    Array<char, TAGNAME_SIZE> tags;
     char content[TASKCONTENT_SIZE];
 
     //construct

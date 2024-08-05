@@ -10,8 +10,8 @@ bool remind_t::check() const
 }
 
 Task::Task(): name("new task"), 
-    priority(None), status(Unfinished), 
     begin(time(NULL)), end(time(NULL)), remind(), 
+    priority(None), status(Unfinished), 
     tags(), content() {}
 
 void Task::showtask() const
