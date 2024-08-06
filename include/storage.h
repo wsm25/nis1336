@@ -61,7 +61,7 @@ public:
     User &user();
     /// task
     // Get Task array and write length into `len`
-    Task *tasks(uint64_t &len);
+    Task *tasks(size_t &len);
     // Any task insertion MUST use insert_task method, to allocate
     // new memory on file; otherwise SIGSEGV may be raised
     void insert_task(const Task &task);

@@ -342,7 +342,7 @@ bool parseTask(std::istringstream &iss, Task &t)
 }
 
 //parse taskID
-bool parseTaskID(std::istringstream &iss, Tasks &using_tasks, uint64_t &id)
+bool parseTaskID(std::istringstream &iss, Tasks &using_tasks, size_t &id)
 {
     iss >> id;
     if(iss.fail())
@@ -449,7 +449,7 @@ int addtask(std::istringstream &iss, Tasks &using_tasks)
 
 int deltask(std::istringstream &iss, Tasks &using_tasks)
 {
-    uint64_t id;
+    size_t id;
     if(!parseTaskID(iss, using_tasks, id)) return 1;
     if(iss.eof())
     {
@@ -462,13 +462,13 @@ int deltask(std::istringstream &iss, Tasks &using_tasks)
 
 int edittask(std::istringstream &iss, Tasks &using_tasks)
 {
-    uint64_t id;
+    size_t id;
     if(!parseTaskID(iss, using_tasks, id)) return 1;
     if(!parseTask(iss, using_tasks[id])) return 1;
     return 0;
 }
 
-int showtask_aux(const std::vector<uint64_t> &v, Tasks &using_tasks)
+int showtask_aux(const std::vector<size_t> &v, Tasks &using_tasks)
 {
     if(v.empty())
     {

@@ -6,6 +6,7 @@
 //! We use `mmap` on posix platforms, and `MapViewOfFile` on windows
 #include "storage.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <fstream>
@@ -368,7 +369,7 @@ User &Storage::user()
     return *(User *)((uint8_t *)mapping + sizeof(Metadata));
 }
 
-Task *Storage::tasks(uint64_t &len)
+Task *Storage::tasks(size_t &len)
 {
     len = (*used - sizeof(Metadata) - sizeof(User)) / sizeof(Task);
     return (Task *)((uint8_t *)mapping + sizeof(Metadata) + sizeof(User));
@@ -387,7 +388,7 @@ void Storage::insert_task(const Task &task)
     memcpy((uint8_t *)mapping + *used, &task, sizeof(Task));
     *used += sizeof(Task);
     //printf("insert at %lu\n", *used);
-    uint64_t len;
+    size_t len;
     tasks(len);
     std::cout << "addtask: " << std::left << std::setw(6) << len - 1 << " ";
     task.showtask();

@@ -1,7 +1,6 @@
 #ifndef SCHEDULE_USER_H
 #define SCHEDULE_USER_H
 
-#include <cstdint>
 #include "consts.h"
 // include the header "pathToLib/sha1.h" to use sha_512
 // If you are using C++14 or C++17, don't forget the "gsl" folder!

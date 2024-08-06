@@ -1,7 +1,6 @@
 #ifndef SCHEDULE_TASK_H
 #define SCHEDULE_TASK_H
 
-#include <stdint.h>
 #include <time.h>
 #include "array.h"
 #include "consts.h"
