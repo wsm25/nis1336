@@ -278,11 +278,11 @@ bool parseTask(std::istringstream &iss, Task &t)
                 return false;
             }
             const char *Con = (*it).c_str();
-            if(!_stricmp(Con, "Low"))
+            if(!strcasecmp(Con, "Low"))
                 t.priority = Task::Low;
-            else if(!_stricmp(Con, "Mid"))
+            else if(!strcasecmp(Con, "Mid"))
                 t.priority = Task::Mid;
-            else if(!_stricmp(Con, "High"))
+            else if(!strcasecmp(Con, "High"))
                 t.priority = Task::High;
             else return false;
         }
@@ -314,11 +314,11 @@ bool parseTask(std::istringstream &iss, Task &t)
                 return false;
             }
             const char *Con = (*it).c_str();
-            if(!_stricmp(Con, "unfin"))
+            if(!strcasecmp(Con, "unfin"))
                 t.status = Task::Unfinished;
-            else if(!_stricmp(Con, "fin"))
+            else if(!strcasecmp(Con, "fin"))
                 t.status = Task::Finished;
-            else if(!_stricmp(Con, "abort"))
+            else if(!strcasecmp(Con, "abort"))
                 t.status = Task::Abort;
             else return false;
         }
@@ -572,11 +572,11 @@ int showtask(std::istringstream &iss, Tasks &using_tasks)
             iss >> word;
             if(iss.fail() || !iss.eof())
                 return invalidCommand(iss);
-            if(_stricmp(word.c_str(),"high") == 0)
+            if(strcasecmp(word.c_str(),"high") == 0)
                 return show_high_pri(using_tasks);
-            else if(_stricmp(word.c_str(),"mid") == 0)
+            else if(strcasecmp(word.c_str(),"mid") == 0)
                 return show_mid_pri(using_tasks);
-            else if(_stricmp(word.c_str(),"low") == 0)
+            else if(strcasecmp(word.c_str(),"low") == 0)
                 return show_low_pri(using_tasks);
             else 
             {
