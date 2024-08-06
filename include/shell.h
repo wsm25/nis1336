@@ -6,7 +6,6 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <unistd.h>
 #include <thread>
 
 class terminal

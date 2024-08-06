@@ -272,7 +272,13 @@ void *user::remind()
         }
         mutex.unlock();
         if(isstopped) break;
+#ifdef _WIN32
+        #include <windows.h>
+        Sleep(1000);
+#elif defined(__unix__)
+        #include <unistd.h>
         sleep(1);
+#endif
     }
 
     return nullptr;

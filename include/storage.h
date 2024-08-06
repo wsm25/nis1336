@@ -6,7 +6,7 @@
 
 #include <stddef.h> // size_t
 #ifdef _WIN32
-#include <windef.h> // HANDLE, LPVOID
+#include <windows.h> // HANDLE, LPVOID
 #endif
 
 class Storage
