@@ -8,7 +8,6 @@ project(schedule
 # fxxk u msvc
 if(MSVC)
     add_compile_options("/utf-8")
-    add_compile_options("/utf-8")
     add_compile_definitions(NOMINMAX)
 endif()
 

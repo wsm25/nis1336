@@ -5,11 +5,9 @@
 #include "user.h"
 
 #include <stddef.h> // size_t
+
 #ifdef _WIN32
 #include <windows.h> // HANDLE, LPVOID
-#endif
-#ifdef __unix__
-#include <unistd.h>
 #endif
 
 class Storage

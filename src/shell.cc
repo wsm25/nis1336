@@ -1,5 +1,8 @@
 #include "shell.h"
 #include <mutex>
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 extern std::mutex mutex;
 
@@ -272,11 +275,7 @@ void *user::remind()
         }
         mutex.unlock();
         if(isstopped) break;
-#ifdef _WIN32
-        Sleep(1000);
-#elif defined(__unix__)
-        sleep(1);
-#endif
+        std::this_thread::sleep_for(1s);
     }
 
     return nullptr;

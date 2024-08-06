@@ -13,7 +13,7 @@ github仓库：<https://github.com/wsm25/nis1336>
 
 `include/`: .h头文件  
 `src/`: .cc源代码  
-`test.sh`, `test.txt`: 测试程序
+`test.sh`: 测试程序
 
 `static/`: 设计文档.md使用的图片  
 `DESIGN.md`: 设计文档  
@@ -26,3 +26,4 @@ github仓库：<https://github.com/wsm25/nis1336>
 - Linux, gcc 11 + gmake
 - Windows, gcc 13 (x86_64-posix-seh-rev0, mingw) + gmake
 - Windows, Visual Studio 2022
+- Windows 11, gcc (Rev3, Built by MSYS2 project) 14.1.0 + cmake

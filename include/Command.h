@@ -5,10 +5,6 @@
 #include <sstream>
 #include "tasks.h"
 
-#ifdef _WIN32
-#define strcasecmp _stricmp
-#endif
-
 // about error: return 0 means no error and return 1 means error
 int invalidCommand(std::istringstream &iss);
 

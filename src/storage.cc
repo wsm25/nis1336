@@ -4,23 +4,13 @@
 //! (Metadata | User | Task[N])
 //! 
 //! We use `mmap` on posix platforms, and `MapViewOfFile` on windows
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined(__unix__)
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#else
-#error Current platform is not supported
-#endif
+#include "storage.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
-#include "storage.h"
 #include <mutex>
 
 #if defined(_WIN32)
@@ -38,6 +28,12 @@ void PrintError(const char *ErrMsg)
 }
 #elif defined(__unix__)
 #include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#else
+#error Current platform is not supported
 #endif
 
 std::mutex mutex;
@@ -208,7 +204,7 @@ error:
 #elif defined(__unix__)
     close(fd);
     fd = -1;
-    perror("sinup");
+    perror("signup");
 #endif
     goto end;
 }
