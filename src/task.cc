@@ -16,32 +16,22 @@ Task::Task(): name("new task"),
 
 void Task::showtask() const
 {
-    char time[21];
     std::cout << std::left << std::setw(TASKNAME_SIZE) << name;
-
-    struct tm local_time_b = *localtime(&begin);
-    struct tm local_time_r = *localtime(&remind.t);
-    struct tm local_time_e = *localtime(&end);
-
-    strftime(time, sizeof(time), "%Y/%m/%d-%T", &local_time_b);
-    std::cout << std::left << std::setw(21) << time;
-    strftime(time, sizeof(time), "%Y/%m/%d-%T", &local_time_e);
-    std::cout << std::left << std::setw(21) << time;
-    strftime(time, sizeof(time), "%Y/%m/%d-%T", &local_time_r);
-    std::cout << std::left << std::setw(21) << time;
-
+    std::cout << std::put_time(localtime(&begin), "%Y/%m/%d-%T  ");
+    std::cout << std::put_time(localtime(&end), "%Y/%m/%d-%T  ");
+    std::cout << std::put_time(localtime(&remind.t), "%Y/%m/%d-%T  ");
     switch(priority)
     {
-    case None: std::cout << std::left << std::setw(5) << "none"; break;
-    case Low: std::cout << std::left << std::setw(5) << "low"; break;
-    case Mid: std::cout << std::left << std::setw(5) << "mid"; break;
-    case High: std::cout << std::left << std::setw(5) << "high"; break;
+    case None: std::cout << std::left << std::setw(PRINAME_SIZE) << "none"; break;
+    case Low: std::cout << std::left << std::setw(PRINAME_SIZE) << "low"; break;
+    case Mid: std::cout << std::left << std::setw(PRINAME_SIZE) << "mid"; break;
+    case High: std::cout << std::left << std::setw(PRINAME_SIZE) << "high"; break;
     }
     switch(status)
     {
-    case Unfinished: std::cout << std::left << std::setw(6) << "Unfin"; break;
-    case Finished: std::cout << std::left << std::setw(6) << "Fin"; break;
-    case Abort: std::cout << std::left << std::setw(6) << "Abort"; break;
+    case Unfinished: std::cout << std::left << std::setw(STATNAME_SIZE) << "Unfin"; break;
+    case Finished: std::cout << std::left << std::setw(STATNAME_SIZE) << "Fin"; break;
+    case Abort: std::cout << std::left << std::setw(STATNAME_SIZE) << "Abort"; break;
     }
     std::cout << std::left << std::setw(TAGNAME_SIZE) << tags << std::endl;
     std::cout << "\t" << content << std::endl;

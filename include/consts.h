@@ -6,19 +6,24 @@
 #define TASKNAME_SIZE 20
 #define TASKCONTENT_SIZE 1024
 
+#define TASKID_SIZE 8
+#define TIMENAME_SIZE 21
+#define PRINAME_SIZE 5
+#define STATNAME_SIZE 6
+
 #define MAX_TAGS_PER_TASK 16
 #define MAX_TAGS_PER_USER 128
 
 #define HASHEDPASSED_SIZE 129
 #define PASSWORD_SIZE 20
 
-constexpr char DATAPATH[] = "data/";
+constexpr const char *DATAPATH = "data/";
 #define FILEPATH_SIZE 44 // (DATAPATH_SIZE - 1) + 2 * (USERNAME_SIZE - 1) + 1
 
 #define RESET "\033[0m"
 #define RED "\033[31m"
 
-constexpr char HELP_TERMINAL[] = 
+constexpr const char *HELP_TERMINAL = 
 R"WSM(Schedule Command Line Tool
 
 Usage:  schedule run                                      run shell with schedule reminder
@@ -66,7 +71,7 @@ Commands:
  deltask <taskID>                       delete task with given ID. alias for `edittask <taskID> -s abort`
  )WSM";
 
-constexpr char HELP_SCHEDULE[] = 
+constexpr const char *HELP_SCHEDULE = 
 R"HSY(Schedule Shell Interface
 
 Usage:  help                                    print this help           
@@ -77,7 +82,7 @@ Usage:  help                                    print this help
                                                 default: shell will guide you to enter
 )HSY";
 
-constexpr char HELP_USER [] =
+constexpr const char *HELP_USER =
 R"PIPI(Schedule User Interface
 
 Usage:  help                                    print this help           
